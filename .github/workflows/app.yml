@@ -1,0 +1,95 @@
+name: laravel
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+  release:
+    types: [ published ]
+jobs:
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+      - uses: ramsey/composer-install@v2
+      - name: Setup env
+        run: cp .env.pipelines .env
+      - name: PhpStan
+        run: php vendor/bin/phpstan analyse --memory-limit=2G
+      - name: PhpCs
+        run: php vendor/bin/pint --test
+  tests:
+    runs-on: ubuntu-20.04
+    services:
+      mariadb:
+        image: 'bitnami/mariadb:latest'
+        env:
+          MARIADB_ROOT_PASSWORD: password
+          MARIADB_ROOT_USER: sail
+          MARIADB_DATABASE: app
+        ports:
+          - 3306:3306
+    steps:
+      - uses: actions/checkout@v3
+      - uses: browser-actions/setup-chrome@latest
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+      - uses: ramsey/composer-install@v2
+      - name: Install yarn dependencies
+        run: yarn install --frozen-lockfile
+      - name: Setup env
+        run: cp .env.pipelines .env
+      - name: Generate artisan key
+        run: php artisan key:generate
+      - name: Rebuild front
+        run: yarn build
+      - name: PhpUnit
+        run: php artisan test --parallel
+  deploy-staging:
+    runs-on: ubuntu-20.04
+    needs: tests
+    if: github.ref == 'refs/heads/main' && github.event_name != 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+      - uses: ramsey/composer-install@v2
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY_STAGING }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS_STAGING }}
+      - name: Deploy
+        run: ./vendor/bin/dep deploy staging
+  deploy-production:
+    runs-on: ubuntu-20.04
+    needs: tests
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+      - uses: ramsey/composer-install@v2
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY_PRODUCTION }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS_PRODUCTION }}
+      - name: Deploy
+        run: ./vendor/bin/dep deploy production

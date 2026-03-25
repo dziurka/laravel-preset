@@ -1,0 +1,139 @@
+name: laravel
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+  release:
+    types: [published]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      - name: Setup env
+        run: cp .env.pipelines .env
+
+      - name: Pint
+        run: php vendor/bin/pint --test
+
+      - name: PHPStan
+        run: php vendor/bin/phpstan analyse --memory-limit=2G
+
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      pgsql:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: sail
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U sail -d app"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: browser-actions/setup-chrome@v1
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install yarn dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup env
+        run: cp .env.pipelines .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Build frontend
+        run: yarn build
+
+      - name: Run tests
+        run: php artisan test --parallel
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint, tests]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'release'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY_STAGING }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS_STAGING }}
+
+      - name: Deploy
+        run: ./vendor/bin/dep deploy staging
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint, tests]
+    if: github.event_name == 'release'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY_PRODUCTION }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS_PRODUCTION }}
+
+      - name: Deploy
+        run: ./vendor/bin/dep deploy production

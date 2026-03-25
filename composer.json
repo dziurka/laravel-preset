@@ -1,0 +1,62 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "dziurka/laravel-preset",
+    "type": "library",
+    "description": "A Composer package that scaffolds a fresh Laravel project with custom configuration, dependencies, and files.",
+    "keywords": [
+        "laravel",
+        "scaffolding",
+        "preset",
+        "boilerplate",
+        "docker",
+        "sail",
+        "deployment",
+        "deployer",
+        "github-actions",
+        "starter-kit"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "illuminate/contracts": "^12.0",
+        "illuminate/support": "^12.0"
+    },
+    "require-dev": {
+        "laravel/framework": "^12.0",
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^10.0",
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dziurka\\LaravelPreset\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dziurka\\LaravelPreset\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "pint --test",
+        "lint-fix": "pint"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dziurka\\LaravelPreset\\ScaffoldingServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

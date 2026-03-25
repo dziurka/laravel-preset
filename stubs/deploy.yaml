@@ -1,0 +1,73 @@
+import:
+  - recipe/laravel.php
+  - contrib/php-fpm.php
+  - contrib/yarn.php
+  - deploy/app.php
+  - deploy/provision.php
+
+config:
+  repository:           # REQUIRED: e.g. 'git@github.com:your-org/your-app.git'
+  remote_user: deployer
+  base_deploy_path: /home/deployer
+  php_fpm_version: '8.2'      # patched by preset:install — must match server PHP-FPM
+  php_version: '8.2'           # patched by preset:install — used by provision:packages
+  db_driver: mysql             # patched by preset:install — mysql | pgsql
+  mailpit_enabled: false       # Mailpit is for local/staging only — never enable on production
+  mailpit_port: 8025           # port Mailpit listens on (provision:mailpit)
+  # mailpit_user: admin        # optional — skips interactive prompt during provision:mailpit
+  # mailpit_password: ''       # optional — skips interactive prompt during provision:mailpit
+  basic_auth_enabled: false    # HTTP basic auth on the app — enable on staging to restrict access
+  # basic_auth_user: admin     # optional — skips interactive prompt during provision:basic-auth
+  # basic_auth_password: ''    # optional — skips interactive prompt during provision:basic-auth
+  supervisor_services:         # supervisor services restarted after each deploy
+    - horizon                  # override per-host when staging+production share one server
+
+  # ── Database provisioning (provision:mysql / provision:pgsql) ───────────────
+  # db_user: sail
+  # db_password: secret
+
+  # ── Redis (optional — uncomment to override defaults) ───────────────────────
+  # redis_password: ''         # leave empty to disable auth
+
+  # ── Health check (optional) ─────────────────────────────────────────────────
+  # health_url: 'https://{{hostname}}/up'
+
+hosts:
+  production:
+    hostname:           # REQUIRED: server IP or domain, e.g. '1.2.3.4'
+    deploy_path: '{{base_deploy_path}}/prod.app'
+    # mailpit_enabled: false   # already false globally — production uses a real mail provider
+    # Configure .env: MAIL_MAILER=smtp (Mailgun, Postmark, SES, Resend…)
+    supervisor_services:
+      - horizon-production     # use 'horizon' when production is on a dedicated server
+    # ── Same-server note (staging + production on one VPS) ─────────────────────
+    # REDIS_DB=0 in .env — separate Redis DB from staging to avoid collisions
+  staging:
+    hostname:           # REQUIRED: server IP or domain, e.g. '1.2.3.4'
+    deploy_path: '{{base_deploy_path}}/staging.app'
+    mailpit_enabled: true      # Mailpit is provisioned on staging only
+    basic_auth_enabled: true   # restrict access to staging with HTTP basic auth
+    supervisor_services:
+      - horizon-staging        # use 'horizon' when staging is on a dedicated server
+      - mailpit
+    # ── Same-server note (staging + production on one VPS) ─────────────────────
+    # REDIS_DB=1 in .env — separate Redis DB from production to avoid collisions
+
+tasks:
+  deploy:
+    - deploy:config
+    - deploy:prepare
+    - deploy:vendors
+    - deploy:env
+    - artisan:storage:link
+    - artisan:config:cache
+    - artisan:route:cache
+    - artisan:view:cache
+    - artisan:event:cache
+    - artisan:migrate
+    - yarn:install
+    - deploy:frontend
+    - deploy:publish
+    - php-fpm:reload
+    - deploy:horizon
+    - deploy:supervisor

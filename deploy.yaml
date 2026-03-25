@@ -1,0 +1,47 @@
+import:
+  - recipe/laravel.php
+  - contrib/php-fpm.php
+  - contrib/yarn.php
+  - deploy/app.php
+  - deploy/provision.php
+
+config:
+  repository:                                             # repository, e.g. 'git@github.com:dziurka/laravel-boilerplate.git'
+  remote_user: 'deployer'
+  base_deploy_path: '/home/deployer'
+  php_fpm_version: '8.2'
+
+hosts:
+  production:
+    hostname:                                             # production server IP e.g. '140.12.12.120'
+    deploy_path: '{{base_deploy_path}}/prod.app'          # deploy path e.g. '{{base_deploy_path}}/prod.test.app'
+  staging:
+    hostname:                                             # staging server IP e.g. '140.12.12.120'
+    deploy_path: '{{base_deploy_path}}/staging.app'       # deploy path e.g. '{{base_deploy_path}}/staging.test.app'
+
+tasks:
+  deploy:
+    - 'app:custom-config'
+    - 'deploy:prepare'
+    - 'deploy:vendors'
+    - 'app:after-vendors'
+    - 'artisan:storage:link'
+    - 'artisan:config:cache'
+    - 'artisan:route:cache'
+    - 'artisan:view:cache'
+    - 'artisan:event:cache'
+    - 'artisan:migrate'
+    - 'yarn:install'
+    - 'yarn:run:prod'
+    - 'deploy:publish'
+    - 'php-fpm:reload'
+    - 'app:reload:horizon'
+    - 'app:run:supervisor'
+  yarn:run:prod:
+    - run: 'cd {{release_or_current_path}} && yarn run build'
+  app:reload:horizon:
+    - run: 'cd {{release_or_current_path}} && php artisan horizon:install && php artisan horizon:terminate'
+  app:run:supervisor:
+    - run: 'sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl restart horizon mailpit'
+  test:
+    - run: 'pwd'
