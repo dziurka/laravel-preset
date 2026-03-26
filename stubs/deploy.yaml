@@ -1,7 +1,7 @@
 import:
   - recipe/laravel.php
   - contrib/php-fpm.php
-  - contrib/yarn.php
+  - contrib/npm.php
   - deploy/app.php
   - deploy/provision.php
 
@@ -55,19 +55,17 @@ hosts:
 
 tasks:
   deploy:
-    - deploy:config
-    - deploy:prepare
-    - deploy:vendors
-    - deploy:env
+    - deploy:prepare        # setup, lock, update_code, deploy:env, shared, writable
+    - deploy:vendors        # composer install
     - artisan:storage:link
     - artisan:config:cache
     - artisan:route:cache
     - artisan:view:cache
     - artisan:event:cache
     - artisan:migrate
-    - yarn:install
-    - deploy:frontend
-    - deploy:publish
+    - npm:install           # installs node_modules (npm ci)
+    - app:frontend          # npm run build
+    - deploy:publish        # symlink, unlock, cleanup, success
     - php-fpm:reload
     - deploy:horizon
     - deploy:supervisor

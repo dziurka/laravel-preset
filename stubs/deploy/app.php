@@ -2,14 +2,13 @@
 
 namespace Deployer;
 
-// ── Shared configuration ──────────────────────────────────────────────────────
-
-task('deploy:config', function () {
-    add('shared_files', ['.env']);
-});
-
 // ── After vendors ─────────────────────────────────────────────────────────────
 
+/**
+ * Overrides the built-in deploy:env (recipe/deploy/env.php).
+ * Copies .env.example → shared/.env only when .env is absent/empty,
+ * then generates APP_KEY if one is not already set.
+ */
 task('deploy:env', [
     'deploy:env:copy',
     'deploy:env:key',
@@ -58,8 +57,8 @@ task('deploy:env:key', function () {
 
 // ── Frontend ──────────────────────────────────────────────────────────────────
 
-task('deploy:frontend', function () {
-    run('cd {{release_or_current_path}} && yarn run build');
+task('app:frontend', function () {
+    run('cd {{release_or_current_path}} && npm run build');
 });
 
 // ── Post-deploy services ──────────────────────────────────────────────────────

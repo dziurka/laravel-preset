@@ -15,7 +15,6 @@ task('provision:before', [
 
 task('provision:after', [
     'provision:packages',
-    'provision:yarn',
     'provision:valkey',
     'provision:mailpit',
     'provision:basic-auth',

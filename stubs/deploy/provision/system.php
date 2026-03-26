@@ -36,27 +36,6 @@ task('provision:packages', function () {
     info("System packages installed (PHP {$phpVersion}).");
 });
 
-// ── Yarn ──────────────────────────────────────────────────────────────────────
-
-task('provision:yarn', function () {
-    if (test('command -v yarn &>/dev/null')) {
-        info('Yarn already installed — skipping.');
-
-        return;
-    }
-
-    // Modern keyring-based installation (Ubuntu 22.04+)
-    run(implode(' && ', [
-        'sudo apt-get install -y curl gpg',
-        'curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo gpg --dearmor -o /usr/share/keyrings/yarn-archive-keyring.gpg',
-        'echo "deb [signed-by=/usr/share/keyrings/yarn-archive-keyring.gpg] https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list',
-        'sudo apt-get update -q',
-        'sudo apt-get install -y yarn',
-    ]));
-
-    info('Yarn installed.');
-});
-
 // ── Valkey ────────────────────────────────────────────────────────────────────
 
 task('provision:valkey', function () {

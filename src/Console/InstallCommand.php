@@ -203,7 +203,7 @@ class InstallCommand extends Command
     {
         $this->info('🚢 Installing Deployer...');
 
-        $this->runComposer(['require', '--dev', 'deployer/deployer:^7.4']);
+        $this->runComposer(['require', '--dev', 'deployer/deployer:^8.0']);
 
         $base = base_path();
         $this->copyFile('deploy.yaml', $base.'/deploy.yaml');
