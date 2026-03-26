@@ -105,7 +105,6 @@ class InstallCommand extends Command
         $base = base_path();
 
         $this->copyFile("docker-compose.{$db}.yml", $base.'/docker-compose.yml');
-        $this->copyFile(".env.example.{$db}", $base.'/.env.example');
         $this->copyFile(".env.pipelines.{$db}", $base.'/.env.pipelines');
         $this->copyFile(".github/workflows/app.{$db}.yml", $base.'/.github/workflows/app.yml');
         $this->copyFile('.github/copilot-instructions.md', $base.'/.github/copilot-instructions.md');
@@ -120,9 +119,6 @@ class InstallCommand extends Command
         $this->patchFile($base.'/.github/workflows/app.yml', [
             "/(?<=php-version: ')[0-9]+\.[0-9]+/" => $this->phpProd,
         ]);
-
-        // Merge our .env.example values into the existing .env (preserves APP_KEY etc.)
-        $this->mergeEnv($base.'/.env', $this->stubsPath."/.env.example.{$db}");
     }
 
     private function patchDockerCompose(string $path): void
@@ -179,10 +175,10 @@ class InstallCommand extends Command
             ];
 
         $replacements = array_merge($replacements, [
-            '/^SESSION_DRIVER=.*/m'   => 'SESSION_DRIVER=database',
-            '/^QUEUE_CONNECTION=.*/m' => 'QUEUE_CONNECTION=database',
+            '/^SESSION_DRIVER=.*/m'   => 'SESSION_DRIVER=redis',
+            '/^QUEUE_CONNECTION=.*/m' => 'QUEUE_CONNECTION=horizon',
             '/^CACHE_STORE=.*/m'      => 'CACHE_STORE=redis',
-            '/^REDIS_HOST=.*/m'       => 'REDIS_HOST=redis',
+            '/^REDIS_HOST=.*/m'       => 'REDIS_HOST=valkey',
             '/^MAIL_HOST=.*/m'        => 'MAIL_HOST=mailpit',
         ]);
 
@@ -360,45 +356,6 @@ class InstallCommand extends Command
         if (! $process->isSuccessful()) {
             throw new \RuntimeException('Command failed: '.implode(' ', $command));
         }
-    }
-
-    /**
-     * Merge variables from our .env.example into the existing .env.
-     * Variables already present in .env are overwritten with our values.
-     * Variables only in .env (e.g. APP_KEY) are preserved unchanged.
-     * Variables in .env.example not yet in .env are appended.
-     */
-    private function mergeEnv(string $envPath, string $examplePath): void
-    {
-        if (! File::exists($examplePath)) {
-            return;
-        }
-
-        if (! File::exists($envPath)) {
-            File::copy($examplePath, $envPath);
-            $this->line('  <info>+</info> .env');
-
-            return;
-        }
-
-        $env     = File::get($envPath);
-        $example = File::get($examplePath);
-
-        // Extract KEY=VALUE lines from our .env.example (skip comments and blanks)
-        preg_match_all('/^([A-Z][A-Z0-9_]*)=(.*)/m', $example, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $match) {
-            [$key, $value] = [$match[1], $match[2]];
-
-            if (preg_match('/^'.preg_quote($key, '/').'=/m', $env)) {
-                $env = preg_replace('/^'.preg_quote($key, '/').'=.*/m', "{$key}={$value}", $env);
-            } else {
-                $env .= PHP_EOL."{$key}={$value}";
-            }
-        }
-
-        File::put($envPath, $env);
-        $this->line('  <info>~</info> .env (merged preset values)');
     }
 
     private function copyFile(string $stub, string $destination): void
