@@ -141,7 +141,10 @@ docker run --rm -it \
     -w /var/www/html \
     "$PHP_IMAGE" \
     bash -c "
-        composer require '${PRESET_PACKAGE}' --dev --no-interaction --quiet
+        composer config repositories.laravel-preset vcs https://github.com/dziurka/laravel-preset
+        composer config minimum-stability dev
+        composer config prefer-stable true
+        composer require '${PRESET_PACKAGE}:dev-main' --dev --no-interaction --quiet
         php artisan preset:install
     "
 
