@@ -88,9 +88,8 @@ class InstallCommand extends Command
 
         $this->runComposer([
             'require',
-            'inertiajs/inertia-laravel:^2.0',
+            'inertiajs/inertia-laravel:^3.0',
             'laravel/wayfinder:^0.1',
-            'spatie/laravel-data:^4.0',
         ]);
 
         $this->runComposer([

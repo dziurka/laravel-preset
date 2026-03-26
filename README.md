@@ -34,7 +34,7 @@ When finished you have a ready project with Docker, CI/CD, justfile and a config
 |---------|-------------|
 | `inertiajs/inertia-laravel` | Server-side Inertia.js adapter |
 | `laravel/wayfinder` | Typed route helpers for Vue/TypeScript |
-| `spatie/laravel-data` | Typed data objects / DTOs |
+| `spatie/laravel-data` | Typed data objects / DTOs *(add manually when Laravel 13 support lands in v5)* |
 
 ### Composer packages — development
 
