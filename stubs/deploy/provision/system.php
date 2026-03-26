@@ -57,24 +57,24 @@ task('provision:yarn', function () {
     info('Yarn installed.');
 });
 
-// ── Redis ─────────────────────────────────────────────────────────────────────
+// ── Valkey ────────────────────────────────────────────────────────────────────
 
-task('provision:redis', function () {
-    if (test('command -v redis-server &>/dev/null')) {
-        info('Redis already installed — skipping.');
+task('provision:valkey', function () {
+    if (test('command -v valkey-server &>/dev/null')) {
+        info('Valkey already installed — skipping.');
 
         return;
     }
 
     run(implode(' && ', [
         'sudo apt-get install -y lsb-release curl gpg',
-        'curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg',
-        'echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list',
+        'curl -fsSL https://packages.valkey.io/valkey/gpg | sudo gpg --dearmor -o /usr/share/keyrings/valkey-archive-keyring.gpg',
+        'echo "deb [signed-by=/usr/share/keyrings/valkey-archive-keyring.gpg] https://packages.valkey.io/valkey $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/valkey.list',
         'sudo apt-get update -q',
-        'sudo apt-get install -y redis',
+        'sudo apt-get install -y valkey',
     ]));
 
-    info('Redis installed.');
+    info('Valkey installed.');
 });
 
 // ── Permissions ───────────────────────────────────────────────────────────────

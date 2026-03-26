@@ -93,13 +93,13 @@ class StubFilesTest extends TestCase
         $this->assertStringNotContainsString('mariadb:10', $content);
     }
 
-    public function test_docker_compose_uses_pinned_redis_version(): void
+    public function test_docker_compose_uses_valkey(): void
     {
         foreach (['docker-compose.mysql.yml', 'docker-compose.pgsql.yml'] as $file) {
             $content = file_get_contents($this->stubsPath.'/'.$file);
 
-            $this->assertStringNotContainsString("'redis:alpine'", $content, "Unpinned redis image in {$file}");
-            $this->assertStringContainsString('redis:7-alpine', $content, "Expected redis:7-alpine in {$file}");
+            $this->assertStringContainsString('valkey/valkey:8-alpine', $content, "Expected valkey image in {$file}");
+            $this->assertStringNotContainsString('redis:', $content, "Unexpected redis service in {$file}");
         }
     }
 
