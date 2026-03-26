@@ -1,161 +1,161 @@
 # 🛠 dziurka/laravel-preset
 
-> Scaffolding dla świeżych projektów Laravel 13. Instaluje paczki, kopiuje pliki konfiguracyjne, ustawia środowisko i konfiguruje CI/CD — jednym poleceniem.
+> Scaffolding for fresh Laravel 13 projects. Installs packages, copies configuration files, sets up the environment and configures CI/CD — in a single command.
 
 ---
 
-## 🚀 Szybki start (wizard)
+## 🚀 Quick Start (wizard)
 
-Uruchom poniższe polecenie w terminalu. Jedyne co potrzebujesz to **Docker**.
+Run the following command in your terminal. The only requirement is **Docker**.
 
 ```sh
 curl -sSL https://raw.githubusercontent.com/dziurka/laravel-preset/main/wizard.sh -o /tmp/laravel-wizard.sh && bash /tmp/laravel-wizard.sh
 ```
 
-> 💡 Skrypt jest napisany w czystym Bash — działa na każdym shellu (bash, zsh, fish, sh).
+> 💡 The script is written in pure Bash — works in any shell (bash, zsh, fish, sh).
 
-Wizard przeprowadzi Cię przez:
+The wizard will guide you through:
 
-1. ✅ Sprawdzenie wymagań (Docker, just)
-2. 🆕 `laravel new` — interaktywny kreator projektu Laravel 13
-3. 📦 `php artisan preset:install` — instalacja presetu
-4. 🤖 `php artisan boost:install` — konfiguracja integracji z AI agentem
-5. 🏗 `just install <project-name>` — pierwsze uruchomienie (build, migrate, seed)
+1. ✅ Requirements check (Docker, just)
+2. 🆕 `laravel new` — interactive Laravel 13 project creator
+3. 📦 `php artisan preset:install` — preset installation
+4. 🤖 `php artisan boost:install` — AI agent integration setup
+5. 🏗 `just install <project-name>` — first run (build, migrate, seed)
 
-Po zakończeniu masz gotowy projekt z Dockerem, CI/CD, justfile i skonfigurowanym środowiskiem.
+When finished you have a ready project with Docker, CI/CD, justfile and a configured environment.
 
 ---
 
-## 📦 Co instaluje preset
+## 📦 What the preset installs
 
-### Paczki Composer — produkcyjne
+### Composer packages — production
 
-| Paczka | Opis |
-|--------|------|
-| `inertiajs/inertia-laravel` | Adapter Inertia.js po stronie serwera |
-| `laravel/wayfinder` | Typowane helpery do routingu (Vue/TypeScript) |
-| `spatie/laravel-data` | Typowane obiekty danych / DTO |
+| Package | Description |
+|---------|-------------|
+| `inertiajs/inertia-laravel` | Server-side Inertia.js adapter |
+| `laravel/wayfinder` | Typed route helpers for Vue/TypeScript |
+| `spatie/laravel-data` | Typed data objects / DTOs |
 
-### Paczki Composer — developerskie
+### Composer packages — development
 
-| Paczka | Opis |
-|--------|------|
-| `laravel/sail` | Środowisko developerskie oparte o Docker |
-| `laravel/pint` | Formatowanie kodu (Laravel preset) |
-| `laravel/pail` | Podgląd logów w czasie rzeczywistym |
-| `larastan/larastan` | Statyczna analiza kodu (PHPStan dla Laravel) |
-| `barryvdh/laravel-ide-helper` | Autouzupełnianie modeli w IDE |
-| `brianium/paratest` | Równoległe uruchamianie testów PHPUnit |
-| `laravel/boost` | Integracja z AI agentami (Copilot, Claude, Cursor…) |
-| `deployer/deployer` | *(opcjonalne)* Automatyczne deploymenty na serwer |
+| Package | Description |
+|---------|-------------|
+| `laravel/sail` | Docker-based local development environment |
+| `laravel/pint` | Code style fixer (Laravel preset) |
+| `laravel/pail` | Real-time log viewer |
+| `larastan/larastan` | Static analysis (PHPStan for Laravel) |
+| `barryvdh/laravel-ide-helper` | IDE model auto-completion |
+| `brianium/paratest` | Parallel PHPUnit test runner |
+| `laravel/boost` | AI agent integration (Copilot, Claude, Cursor…) |
+| `deployer/deployer` | *(optional)* Automated server deployments |
 
-### Kopiowane pliki
+### Copied files
 
-| Plik / katalog | Opis |
-|----------------|------|
-| `justfile` | Skróty do Sail, testów, lintingu i deploymentu |
+| File / directory | Description |
+|------------------|-------------|
+| `justfile` | Shortcuts for Sail, testing, linting and deployment |
 | `docker-compose.yml` | Stack: PHP, MariaDB 11 / PostgreSQL 17, Valkey, Mailpit |
-| `docker/` | Dockerfile PHP 8.3/8.4, php.ini, konfiguracja Supervisora |
-| `.env.example` | Prekonfigurowane zmienne środowiskowe |
-| `.env.pipelines` | Plik `.env` dla CI/CD |
-| `.github/workflows/app.yml` | Pipeline GitHub Actions (lint → test → deploy) |
-| `.github/copilot-instructions.md` | Dobre praktyki dla GitHub Copilot |
-| `deploy.yaml` | *(opcjonalne)* Konfiguracja Deployera |
-| `deploy/` | *(opcjonalne)* Skrypty provisioningu i deploymentu |
+| `docker/` | PHP 8.3/8.4 Dockerfiles, php.ini, Supervisor config |
+| `.env.example` | Pre-configured environment variables |
+| `.env.pipelines` | Environment file for CI/CD |
+| `.github/workflows/app.yml` | GitHub Actions pipeline (lint → test → deploy) |
+| `.github/copilot-instructions.md` | Best practices for GitHub Copilot |
+| `deploy.yaml` | *(optional)* Deployer configuration |
+| `deploy/` | *(optional)* Provisioning and deployment scripts |
 
-### 🐳 Stack Dockerowy
+### 🐳 Docker stack
 
-| Serwis | Obraz | Env |
-|--------|-------|-----|
+| Service | Image | Environment |
+|---------|-------|-------------|
 | `app` | PHP 8.3 / 8.4 (Sail) | local |
 | `mariadb` | `mariadb:11` | local |
 | `pgsql` | `postgres:17-alpine` | local |
 | `valkey` | `valkey/valkey:8-alpine` | local |
 | `mailpit` | `axllent/mailpit` | local / staging |
 
-> 📬 Mailpit (webowy klient email) działa tylko lokalnie i na stagingu. Na produkcji wymagany jest zewnętrzny provider (Mailgun, Postmark, SES, SMTP).
+> 📬 Mailpit (local email client) runs only on local and staging environments. Production requires an external provider (Mailgun, Postmark, SES, SMTP).
 
-### ⚙️ Domyślne zmienne środowiskowe
+### ⚙️ Default environment variables
 
-| Zmienna | Wartość | Opis |
-|---------|---------|------|
-| `SESSION_DRIVER` | `redis` | Sesje przechowywane w Valkey |
-| `QUEUE_CONNECTION` | `horizon` | Kolejki obsługiwane przez Laravel Horizon |
-| `CACHE_STORE` | `redis` | Cache w Valkey |
-| `REDIS_HOST` | `valkey` | Nazwa serwisu Valkey w Dockerze |
-| `DB_HOST` | `mariadb` / `pgsql` | Zgodnie z wybraną bazą danych |
-| `MAIL_HOST` | `mailpit` | Lokalny klient email |
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `SESSION_DRIVER` | `redis` | Sessions stored in Valkey |
+| `QUEUE_CONNECTION` | `horizon` | Queues handled by Laravel Horizon |
+| `CACHE_STORE` | `redis` | Cache stored in Valkey |
+| `REDIS_HOST` | `valkey` | Valkey service name in Docker |
+| `DB_HOST` | `mariadb` / `pgsql` | Based on the chosen database |
+| `MAIL_HOST` | `mailpit` | Local email client |
 
 ---
 
-## 🔧 Wymagania
+## 🔧 Requirements
 
-- **Docker** — jedyne wymaganie do uruchomienia wizarda
-- PHP `^8.3` (Sail zapewnia PHP w kontenerze)
+- **Docker** — the only requirement to run the wizard
+- PHP `^8.3` (Sail provides PHP inside the container)
 - Laravel `^13.0`
-- Yarn (dla zależności frontendowych)
+- Yarn (for frontend dependencies)
 
 ---
 
-## 🛠 Instalacja ręczna (bez wizarda)
+## 🛠 Manual installation (without wizard)
 
-Jeśli masz już istniejący projekt Laravel 13:
+If you already have an existing Laravel 13 project:
 
 ```bash
-# 1. Zainstaluj preset
+# 1. Install the preset
 composer require dziurka/laravel-preset --dev
 
-# 2. Uruchom instalator
+# 2. Run the installer
 php artisan preset:install
 ```
 
-Instalator zapyta o:
+The installer will ask:
 
-1. 🗄 **Silnik bazy danych** — MySQL/MariaDB lub PostgreSQL
-2. 🐘 **Wersja PHP (lokalna / Sail)** — 8.4 *(zalecana)* lub 8.3
-3. 🖥 **Wersja PHP (produkcja)** — 8.4 lub 8.3
-4. 🚢 **Deployer** — opcjonalna instalacja narzędzia do deploymentu
-5. 🤖 **Boost** — konfiguracja integracji z AI agentem
+1. 🗄 **Database driver** — MySQL/MariaDB or PostgreSQL
+2. 🐘 **PHP version (local / Sail)** — 8.4 *(recommended)* or 8.3
+3. 🖥 **PHP version (production)** — 8.4 or 8.3
+4. 🚢 **Deployer** — optional deployment tool installation
+5. 🤖 **Boost** — AI agent integration setup
 
 ---
 
-## 💻 Codzienny development
+## 💻 Daily development
 
 ```bash
-just build          # Zbuduj obrazy Dockerowe (pierwsze uruchomienie)
-just install myapp  # Pełna konfiguracja projektu (up, migrate, seed)
+just build          # Build Docker images (first run)
+just install myapp  # Full project setup (up, migrate, seed)
 ```
 
-| Polecenie | Opis |
-|-----------|------|
-| `just up` / `just down` | Uruchom / zatrzymaj kontenery |
-| `just shell` | Wejdź do kontenera aplikacji |
-| `just tinker` | Otwórz Laravel Tinker |
+| Command | Description |
+|---------|-------------|
+| `just up` / `just down` | Start / stop containers |
+| `just shell` | Shell into the app container |
+| `just tinker` | Open Laravel Tinker REPL |
 | `just fresh` | Fresh migrate + seed |
-| `just migrate-rollback` | Cofnij ostatnią migrację |
-| `just cache-clear` | Wyczyść cache (config, route, view, app) |
-| `just test` | Uruchom wszystkie testy równolegle |
-| `just test MyClass` | Uruchom pojedynczą klasę testową |
-| `just test-coverage` | Generuj raport pokrycia kodu (HTML) |
-| `just pint` | Napraw styl kodu |
-| `just pint check=true` | Sprawdź styl bez zmian (tryb CI) |
-| `just phpstan` | Statyczna analiza kodu |
+| `just migrate-rollback` | Roll back the last migration batch |
+| `just cache-clear` | Clear config, route, view and app cache |
+| `just test` | Run all tests in parallel |
+| `just test MyClass` | Run a single test class |
+| `just test-coverage` | Generate HTML coverage report |
+| `just pint` | Fix code style |
+| `just pint check=true` | Dry-run Pint (CI mode) |
+| `just phpstan` | Run static analysis |
 | `just lint` | Pint + PHPStan |
-| `just check` | Lint + testy |
-| `just pre-commit` | Fresh migrate + IDE helpers + lint + testy |
-| `just artisan "route:list"` | Dowolne polecenie artisan |
-| `just ide` | Generuj docblocki modeli dla IDE |
-| `just provision staging` | Provisioning serwera (pierwsza konfiguracja) |
-| `just secrets staging` | Ustaw GitHub Secrets przez gh CLI |
-| `just deploy staging` | Deploy na środowisko |
+| `just check` | Lint + tests |
+| `just pre-commit` | Fresh migrate + IDE helpers + lint + tests |
+| `just artisan "route:list"` | Run any artisan command |
+| `just ide` | Generate IDE helper model docblocks |
+| `just provision staging` | Provision a server (first-time setup) |
+| `just secrets staging` | Set GitHub Secrets via gh CLI |
+| `just deploy staging` | Deploy to an environment |
 
 ---
 
-## 🌐 Deployment (jeśli Deployer jest zainstalowany)
+## 🌐 Deployment (requires Deployer)
 
-### 1️⃣ Konfiguracja deploy.yaml
+### 1️⃣ Configure deploy.yaml
 
-Uzupełnij `repository` i adresy serwerów:
+Fill in `repository` and server addresses:
 
 ```yaml
 config:
@@ -163,19 +163,19 @@ config:
 
 hosts:
   production:
-    hostname: '1.2.3.4'   # IP serwera produkcyjnego
+    hostname: '1.2.3.4'   # production server IP
   staging:
-    hostname: '5.6.7.8'   # IP serwera stagingowego
+    hostname: '5.6.7.8'   # staging server IP
 ```
 
-> 💡 **Wiele środowisk na jednym VPS?** To obsługiwane! Każde środowisko dostaje osobny:
-> - katalog deploymentu (`/var/www/myapp-production`, `/var/www/myapp-staging`)
-> - konfigurację Supervisora (`horizon-production`, `horizon-staging`)
-> - bazę danych Valkey (`REDIS_DB=0` dla produkcji, `REDIS_DB=1` dla stagingu)
+> 💡 **Multiple environments on one VPS?** Fully supported! Each environment gets its own:
+> - Deployment directory (`/var/www/myapp-production`, `/var/www/myapp-staging`)
+> - Supervisor config (`horizon-production`, `horizon-staging`)
+> - Valkey database (`REDIS_DB=0` for production, `REDIS_DB=1` for staging)
 
-#### Interaktywne pytania vs. prekonfiguracja
+#### Interactive prompts vs pre-configured values
 
-Niektóre zadania provisioningu pytają interaktywnie (np. hasło Mailpit, basic auth). Możesz pominąć pytania ustawiając wartości w `deploy.yaml`:
+Some provisioning tasks ask interactively for credentials (e.g. Mailpit password, basic auth). You can skip prompts by setting values in `deploy.yaml`:
 
 ```yaml
 # Mailpit (staging)
@@ -187,155 +187,155 @@ basic_auth_user: admin
 basic_auth_password: secret
 ```
 
-Jeśli wartość **nie jest** ustawiona, zadanie zapyta podczas provisioningu.  
-Prekonfiguracja przydaje się przy **automatycznym provisioningu (CI/CD)**.
+If a value is **not** set in `deploy.yaml`, the task will ask during provisioning.  
+Pre-configuring values is useful for **unattended / CI-driven provisioning**.
 
-> ⚠️ Nigdy nie commituj prawdziwych haseł do repozytorium.
+> ⚠️ Never commit real passwords to the repository.
 
 ---
 
-### 2️⃣ Provisioning serwera (jednorazowo)
+### 2️⃣ Provision the server (first time only)
 
 ```bash
 just shell
-./vendor/bin/dep provision staging      # lub: just provision staging
-./vendor/bin/dep provision production   # powtórz dla produkcji
+./vendor/bin/dep provision staging      # or: just provision staging
+./vendor/bin/dep provision production   # repeat for production
 ```
 
-Provisioning wykonuje zadania w kolejności:
+Provisioning runs the following tasks in order:
 
-| Zadanie | Co robi |
-|---------|---------|
-| `provision:sudoers` | Nadaje `deployer` bezhasłowe sudo |
-| `provision:packages` | Instaluje PHP, rozszerzenia, unzip, micro |
-| `provision:yarn` | Instaluje Yarn (oficjalne APT repo) |
-| `provision:valkey` | Instaluje Valkey (oficjalne APT repo) |
-| `provision:mailpit` | Instaluje Mailpit + Supervisor + proxy Caddy (**tylko staging** — `mailpit_enabled: true`) |
-| `provision:basic-auth` | Dodaje HTTP Basic Auth przez Caddy (**tylko staging** — `basic_auth_enabled: true`) |
-| `provision:permissions` | Ustawia właściciela katalogu deploymentu |
-| `provision:horizon` | Tworzy konfigurację Supervisora dla Laravel Horizon |
-| `provision:github` | Generuje klucz SSH deploy, drukuje konfigurację |
-| `provision:github-secrets` | Ustawia GitHub Secrets automatycznie (jeśli `gh` jest dostępne) |
+| Task | What it does |
+|------|-------------|
+| `provision:sudoers` | Grants `deployer` passwordless sudo |
+| `provision:packages` | Installs PHP, extensions, unzip, micro |
+| `provision:yarn` | Installs Yarn (official APT repo) |
+| `provision:valkey` | Installs Valkey (official APT repo) |
+| `provision:mailpit` | Installs Mailpit + Supervisor + Caddy proxy (**staging only** — `mailpit_enabled: true`) |
+| `provision:basic-auth` | Adds HTTP Basic Auth via Caddy (**staging only** — `basic_auth_enabled: true`) |
+| `provision:permissions` | Sets ownership of the deployment directory |
+| `provision:horizon` | Creates Supervisor config for Laravel Horizon |
+| `provision:github` | Generates deploy SSH key, prints configuration |
+| `provision:github-secrets` | Sets GitHub Secrets automatically (if `gh` is available) |
 
 ---
 
-### 3️⃣ Konfiguracja GitHub
+### 3️⃣ Configure GitHub
 
-#### Opcja A — Automatyczna (zalecana): gh CLI
+#### Option A — Automated (recommended): gh CLI
 
-Zainstaluj [GitHub CLI](https://cli.github.com/) i zaloguj się **przed** uruchomieniem Sail:
+Install the [GitHub CLI](https://cli.github.com/) and log in **before** starting Sail:
 
 ```bash
 gh auth login
 ```
 
-Provisioning ustawi wszystkie sekrety automatycznie. Możesz też uruchomić to osobno:
+Provisioning will automatically set all secrets. You can also run it standalone:
 
 ```bash
 just secrets staging
 just secrets production
 ```
 
-> 💡 Jeśli `gh` nie jest zainstalowane, skrypt `provision:github-secrets` zapyta czy zainstalować je przez [webi.sh](https://webinstall.dev/gh/).
+> 💡 If `gh` is not installed, the `provision:github-secrets` script will offer to install it via [webi.sh](https://webinstall.dev/gh/).
 
-Ustawiane sekrety:
+Secrets set per environment:
 
-| Sekret | Opis |
-|--------|------|
-| `SSH_KEY_STAGING` | Prywatny klucz deploy dla stagingu |
-| `KNOWN_HOSTS_STAGING` | Fingerprint serwera stagingowego |
-| `SSH_KEY_PRODUCTION` | Prywatny klucz deploy dla produkcji |
-| `KNOWN_HOSTS_PRODUCTION` | Fingerprint serwera produkcyjnego |
+| Secret | Description |
+|--------|-------------|
+| `SSH_KEY_STAGING` | Private deploy key for staging |
+| `KNOWN_HOSTS_STAGING` | Staging server fingerprint |
+| `SSH_KEY_PRODUCTION` | Private deploy key for production |
+| `KNOWN_HOSTS_PRODUCTION` | Production server fingerprint |
 
-> 🔒 Każdy serwer dostaje osobną niezależną parę kluczy — klucze nie są współdzielone.
+> 🔒 Each server gets its own independently generated key pair — keys are never shared between environments.
 
-#### Opcja B — Ręczna: GitHub UI
+#### Option B — Manual: GitHub UI
 
-Po provisioningu zadanie `provision:github` wydrukuje trzy wartości. Skopiuj je do odpowiednich miejsc:
+After provisioning, the `provision:github` task prints three values. Copy each to the appropriate place:
 
-**1. Deploy key** — pozwala serwerowi na `git pull`
+**1. Deploy key** — allows the server to `git pull`
 
 > GitHub → repo → **Settings → Deploy keys → Add deploy key**
 > - Title: `deployer@your-server (staging)`
-> - Key: wklej klucz `ssh-ed25519 …`
-> - ☑ Allow write access: **zostaw odznaczone**
+> - Key: paste the `ssh-ed25519 …` public key
+> - ☑ Allow write access: **leave unchecked**
 
-**2. Prywatny klucz SSH** — pozwala GitHub Actions łączyć się z serwerem
+**2. Private SSH key** — allows GitHub Actions to connect to the server
 
 > GitHub → repo → **Settings → Secrets and variables → Actions → New repository secret**
 > - Name: `SSH_KEY_STAGING`
-> - Secret: wklej blok `-----BEGIN OPENSSH PRIVATE KEY-----`
+> - Secret: paste the full `-----BEGIN OPENSSH PRIVATE KEY-----` block
 
-Powtórz z `SSH_KEY_PRODUCTION` dla produkcji.
+Repeat with `SSH_KEY_PRODUCTION` for the production server.
 
-**3. Known hosts** — zapobiega weryfikacji hosta w CI
+**3. Known hosts** — prevents host verification prompts in CI
 
 > GitHub → repo → **Settings → Secrets and variables → Actions → New repository secret**
 > - Name: `KNOWN_HOSTS_STAGING`
-> - Secret: wklej linię `ssh-ed25519 …` z `ssh-keyscan`
+> - Secret: paste the `ssh-ed25519 …` line from `ssh-keyscan`
 
-Powtórz z `KNOWN_HOSTS_PRODUCTION` dla produkcji.
+Repeat with `KNOWN_HOSTS_PRODUCTION` for the production server.
 
 ---
 
 ### 4️⃣ Deploy
 
-Po skonfigurowaniu sekretów:
+Once secrets are in place:
 
 ```bash
-# Push do main → automatyczny deploy na staging
+# Push to main → automatic staging deploy
 git push origin main
 
-# Publish Release → automatyczny deploy na produkcję
+# Publish a GitHub Release → automatic production deploy
 
-# Lub ręcznie:
+# Or manually:
 just deploy staging
 just deploy production
 ```
 
-> ⚠️ **Deployer jest opcjonalny.** Jeśli nie jest zainstalowany (`./vendor/bin/dep` nie istnieje), kroki deploy w pipeline będą pominięte z informacją jak go dodać.
+> ⚠️ **Deployer is optional.** If not installed (`./vendor/bin/dep` does not exist), the deploy steps in the pipeline are skipped with instructions on how to add it.
 
 ---
 
 ## 🤖 AI Agent (laravel/boost)
 
-Preset instaluje `laravel/boost` i uruchamia wizard `boost:install`, który konfiguruje integrację z Twoim AI agentem:
+The preset installs `laravel/boost` and runs the `boost:install` wizard which configures integration with your AI agent:
 
 - **GitHub Copilot** (VS Code / JetBrains)
 - **Cursor**
 - **Claude** (Anthropic)
 - **Gemini CLI**
-- i inne…
+- and more…
 
-Boost generuje pliki konfiguracyjne (`.mcp.json`, `CLAUDE.md` itp.) odpowiednie dla wybranego narzędzia.
+Boost generates the appropriate config files (`.mcp.json`, `CLAUDE.md` etc.) for the chosen tool.
 
-Do każdego projektu kopiowany jest też `.github/copilot-instructions.md` z dobrymi praktykami (m.in. zakaz używania fasad, typowanie, konwencje modeli i testów).
+Every project also receives `.github/copilot-instructions.md` with best practices (no facades, strict typing, model and test conventions).
 
 ---
 
-## 🔍 Rozwiązywanie problemów
+## 🔍 Troubleshooting
 
-**Docker build się wysypuje**
+**Docker build fails**
 ```bash
 just down
 docker system prune -f
 just build
 ```
 
-**Testy padają z błędami bazy danych**  
-Upewnij się że `.env` istnieje, następnie uruchom `just fresh`.
+**Tests fail with database errors**  
+Make sure `.env` exists, then run `just fresh`.
 
-**Problemy z kluczem SSH w deploymencie**  
-Uruchom `just provision staging` ponownie, a następnie `just secrets staging` żeby zaktualizować GitHub.
+**Deployment SSH key issues**  
+Run `just provision staging` again, then `just secrets staging` to update GitHub.
 
-**`gh secret set` — brak uprawnień**  
-Upewnij się że masz dostęp `admin` lub `write` do repozytorium i że `gh auth login` użył tokenu z zakresem `repo`.
+**`gh secret set` — permission denied**  
+Make sure you have `admin` or `write` access to the repository and that `gh auth login` used a token with the `repo` scope.
 
-**Provisioning uciął się w połowie**  
-Większość zadań jest idempotentna (bezpieczna do ponownego uruchomienia). Napraw problem i uruchom `just provision staging` ponownie — ukończone kroki zostaną automatycznie pominięte.
+**Provisioning fails midway**  
+Most tasks are idempotent (safe to re-run). Fix the issue and run `just provision staging` again — completed steps will be skipped automatically.
 
-**Skrypt wizard.sh nie startuje na fish / zsh**  
-Użyj formy z pobraniem pliku — działa na każdym shellu:
+**wizard.sh doesn't start on fish / zsh**  
+Use the download-to-file form — works in any shell:
 ```sh
 curl -sSL https://raw.githubusercontent.com/dziurka/laravel-preset/main/wizard.sh -o /tmp/laravel-wizard.sh && bash /tmp/laravel-wizard.sh
 ```
