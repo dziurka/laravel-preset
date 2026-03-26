@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # wizard.sh — Bootstrap a new Laravel project with dziurka/laravel-preset
-# Usage: bash <(curl -sSL https://raw.githubusercontent.com/dziurka/laravel-preset/main/wizard.sh)
+# Usage (stable):  bash wizard.sh
+# Usage (dev/main): bash wizard.sh --dev
 set -euo pipefail
 
 # ── Colours ───────────────────────────────────────────────────────────────────
@@ -12,11 +13,22 @@ die()     { echo -e "${RED}✗${NC} $*" >&2; exit 1; }
 
 PHP_IMAGE="laravelsail/php84-composer:latest"
 PRESET_PACKAGE="dziurka/laravel-preset"
+PRESET_DEV=false
+
+# ── Parse flags ───────────────────────────────────────────────────────────────
+for arg in "$@"; do
+    case "$arg" in
+        --dev|-d) PRESET_DEV=true ;;
+    esac
+done
 
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════╗${NC}"
 echo -e "${BOLD}║   🧙 Laravel Preset Wizard               ║${NC}"
 echo -e "${BOLD}╚══════════════════════════════════════════╝${NC}"
+if [[ "$PRESET_DEV" == true ]]; then
+    echo -e "  ${YELLOW}⚠  Dev mode — installing preset from GitHub main branch${NC}"
+fi
 echo ""
 
 # ── Preflight: Docker ─────────────────────────────────────────────────────────
@@ -135,13 +147,19 @@ info "Installing ${PRESET_PACKAGE} and running preset wizard..."
 echo -e "  ${YELLOW}(You'll be asked about DB driver, PHP version etc.)${NC}"
 echo ""
 
+if [[ "$PRESET_DEV" == true ]]; then
+    COMPOSER_REQUIRE="composer config repositories.laravel-preset vcs https://github.com/dziurka/laravel-preset && composer config minimum-stability dev && composer config prefer-stable true && composer require '${PRESET_PACKAGE}:dev-main' --dev --no-interaction --quiet"
+else
+    COMPOSER_REQUIRE="composer require '${PRESET_PACKAGE}' --dev --no-interaction --quiet"
+fi
+
 docker run --rm -it \
     -u "$UID_GID" \
     -v "$(pwd)/${PROJECT_NAME}:/var/www/html" \
     -w /var/www/html \
     "$PHP_IMAGE" \
     bash -c "
-        composer require '${PRESET_PACKAGE}' --dev --no-interaction --quiet
+        ${COMPOSER_REQUIRE}
         php artisan preset:install
     "
 

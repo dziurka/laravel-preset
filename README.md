@@ -14,6 +14,12 @@ curl -sSL https://raw.githubusercontent.com/dziurka/laravel-preset/main/wizard.s
 
 > 💡 The script is written in pure Bash — works in any shell (bash, zsh, fish, sh).
 
+**Dev mode** — install preset from the `main` branch instead of the latest Packagist release (useful during preset development):
+
+```sh
+curl -sSL https://raw.githubusercontent.com/dziurka/laravel-preset/main/wizard.sh -o /tmp/laravel-wizard.sh && bash /tmp/laravel-wizard.sh --dev
+```
+
 The wizard will guide you through:
 
 1. ✅ Requirements check (Docker, just)
