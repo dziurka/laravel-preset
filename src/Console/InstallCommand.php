@@ -125,6 +125,9 @@ class InstallCommand extends Command
         $this->patchFile($base.'/.github/workflows/app.yml', [
             "/(?<=php-version: ')[0-9]+\.[0-9]+/" => $this->phpProd,
         ]);
+
+        // Merge our .env.example values into the existing .env (preserves APP_KEY etc.)
+        $this->mergeEnv($base.'/.env', $this->stubsPath."/.env.example.{$db}");
     }
 
     private function patchDockerCompose(string $path): void
@@ -294,6 +297,45 @@ class InstallCommand extends Command
         if (! $process->isSuccessful()) {
             throw new \RuntimeException('Command failed: '.implode(' ', $command));
         }
+    }
+
+    /**
+     * Merge variables from our .env.example into the existing .env.
+     * Variables already present in .env are overwritten with our values.
+     * Variables only in .env (e.g. APP_KEY) are preserved unchanged.
+     * Variables in .env.example not yet in .env are appended.
+     */
+    private function mergeEnv(string $envPath, string $examplePath): void
+    {
+        if (! File::exists($examplePath)) {
+            return;
+        }
+
+        if (! File::exists($envPath)) {
+            File::copy($examplePath, $envPath);
+            $this->line('  <info>+</info> .env');
+
+            return;
+        }
+
+        $env     = File::get($envPath);
+        $example = File::get($examplePath);
+
+        // Extract KEY=VALUE lines from our .env.example (skip comments and blanks)
+        preg_match_all('/^([A-Z][A-Z0-9_]*)=(.*)/m', $example, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+            [$key, $value] = [$match[1], $match[2]];
+
+            if (preg_match('/^'.preg_quote($key, '/').'=/m', $env)) {
+                $env = preg_replace('/^'.preg_quote($key, '/').'=.*/m', "{$key}={$value}", $env);
+            } else {
+                $env .= PHP_EOL."{$key}={$value}";
+            }
+        }
+
+        File::put($envPath, $env);
+        $this->line('  <info>~</info> .env (merged preset values)');
     }
 
     private function copyFile(string $stub, string $destination): void

@@ -24,13 +24,40 @@ if ! command -v docker &>/dev/null; then
     die "Docker is required but not installed. Install it from https://docs.docker.com/get-docker/"
 fi
 
-if ! docker info &>/dev/null; then
+if ! docker info &>/dev/null 2>&1; then
     die "Docker daemon is not running. Start Docker and try again."
 fi
 
 success "Docker is available."
 
+# ── Preflight: just ───────────────────────────────────────────────────────────
+if ! command -v just &>/dev/null; then
+    warn "'just' command runner is not installed."
+    echo ""
+    read -rp "$(echo -e "Install ${BOLD}just${NC} now? [Y/n]: ")" INSTALL_JUST
+    INSTALL_JUST="${INSTALL_JUST:-Y}"
+
+    if [[ "$INSTALL_JUST" =~ ^[Yy]$ ]]; then
+        if command -v brew &>/dev/null; then
+            info "Installing just via Homebrew..."
+            brew install just
+        else
+            info "Installing just via official installer..."
+            mkdir -p "$HOME/.local/bin"
+            curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh \
+                | bash -s -- --to "$HOME/.local/bin"
+            export PATH="$HOME/.local/bin:$PATH"
+        fi
+        success "just installed."
+    else
+        die "'just' is required to complete the setup. Install it from https://just.systems and re-run."
+    fi
+fi
+
+success "just is available."
+
 # ── Pull image ────────────────────────────────────────────────────────────────
+echo ""
 info "Pulling Docker image ${PHP_IMAGE}..."
 docker pull --quiet "$PHP_IMAGE"
 success "Image ready."
@@ -48,13 +75,14 @@ while true; do
     fi
 done
 
+UID_GID="$(id -u):$(id -g)"
+
 # ── Create Laravel project ────────────────────────────────────────────────────
 echo ""
 info "Installing Laravel installer and creating project '${PROJECT_NAME}'..."
-echo -e "  ${YELLOW}(The Laravel wizard will start — answer its questions below)${NC}"
+echo -e "  ${YELLOW}(Laravel wizard: answer its questions — choose your starter kit, DB etc.)${NC}"
+echo -e "  ${YELLOW}(When asked 'Would you like to start Sail?' — answer NO, we'll do it next)${NC}"
 echo ""
-
-UID_GID="$(id -u):$(id -g)"
 
 docker run --rm -it \
     -u "$UID_GID" \
@@ -75,7 +103,9 @@ success "Laravel project '${PROJECT_NAME}' created."
 
 # ── Install preset ────────────────────────────────────────────────────────────
 echo ""
-info "Installing ${PRESET_PACKAGE}..."
+info "Installing ${PRESET_PACKAGE} and running preset wizard..."
+echo -e "  ${YELLOW}(You'll be asked about DB driver, PHP version etc.)${NC}"
+echo ""
 
 docker run --rm -it \
     -u "$UID_GID" \
@@ -87,13 +117,28 @@ docker run --rm -it \
         php artisan preset:install
     "
 
+success "Preset installed."
+
+# ── Configure project and start Sail ─────────────────────────────────────────
+echo ""
+info "Configuring project and starting Sail (this may take a minute)..."
+
+cd "$PROJECT_NAME"
+just install "$PROJECT_NAME"
+
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
-echo -e "${GREEN}${BOLD}✅ All done!${NC}"
+echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}${BOLD}║   ✅ Your Laravel project is ready!                  ║${NC}"
+echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  Your project is ready in ${BOLD}./${PROJECT_NAME}${NC}"
+echo -e "  Project:  ${BOLD}./${PROJECT_NAME}${NC}"
+echo -e "  App URL:  ${BOLD}http://${PROJECT_NAME}.local${NC}"
 echo ""
-echo -e "  Next steps:"
-echo -e "    ${CYAN}cd ${PROJECT_NAME}${NC}"
-echo -e "    ${CYAN}just install ${PROJECT_NAME}${NC}   # configure .env, start Sail, migrate"
+echo -e "  Useful commands (from the project directory):"
+echo -e "    ${CYAN}just up${NC}          — start containers"
+echo -e "    ${CYAN}just down${NC}        — stop containers"
+echo -e "    ${CYAN}just shell${NC}       — open shell in app container"
+echo -e "    ${CYAN}just migrate${NC}     — run migrations"
+echo -e "    ${CYAN}just test${NC}        — run tests"
 echo ""
