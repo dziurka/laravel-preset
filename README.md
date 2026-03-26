@@ -30,11 +30,18 @@ When finished you have a ready project with Docker, CI/CD, justfile and a config
 
 ### Composer packages — production
 
+Installed by `laravel new` (starter kit) — not duplicated by the preset:
+
 | Package | Description |
 |---------|-------------|
 | `inertiajs/inertia-laravel` | Server-side Inertia.js adapter |
 | `laravel/wayfinder` | Typed route helpers for Vue/TypeScript |
-| `spatie/laravel-data` | Typed data objects / DTOs *(add manually when Laravel 13 support lands in v5)* |
+
+Add manually when Laravel 13 support is available:
+
+| Package | Description |
+|---------|-------------|
+| `spatie/laravel-data` | Typed data objects / DTOs *(waiting for v5)* |
 
 ### Composer packages — development
 

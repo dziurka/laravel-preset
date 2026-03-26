@@ -87,12 +87,6 @@ class InstallCommand extends Command
         $this->info('📦 Installing Composer dependencies...');
 
         $this->runComposer([
-            'require',
-            'inertiajs/inertia-laravel:^3.0',
-            'laravel/wayfinder:^0.1',
-        ]);
-
-        $this->runComposer([
             'require', '--dev',
             'barryvdh/laravel-ide-helper:^3.6',
             'brianium/paratest:^7.8',
