@@ -58,6 +58,8 @@ class InstallCommand extends Command
             if ($this->confirm('Install Deployer for deployment automation?', false)) {
                 $this->installDeployer();
             }
+
+            $this->installBoost();
         } catch (\RuntimeException $e) {
             $this->error($e->getMessage());
 
@@ -264,6 +266,19 @@ class InstallCommand extends Command
         ]);
 
         $this->comment('👉 Configure repository and server hostnames in deploy.yaml.');
+    }
+
+    private function installBoost(): void
+    {
+        $this->info('🤖 Installing Laravel Boost (AI agent integration)...');
+
+        $this->runComposer(['require', '--dev', 'laravel/boost']);
+
+        $this->newLine();
+        $this->comment('Running boost:install wizard — choose your AI editor/agent below:');
+        $this->newLine();
+
+        $this->runProcess(['php', 'artisan', 'boost:install']);
     }
 
     private function patchFile(string $path, array $replacements): void
