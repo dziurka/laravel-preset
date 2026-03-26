@@ -113,6 +113,7 @@ class InstallCommand extends Command
         $this->copyFile(".env.example.{$db}", $base.'/.env.example');
         $this->copyFile(".env.pipelines.{$db}", $base.'/.env.pipelines');
         $this->copyFile(".github/workflows/app.{$db}.yml", $base.'/.github/workflows/app.yml');
+        $this->copyFile('.github/copilot-instructions.md', $base.'/.github/copilot-instructions.md');
         $this->copyFile('justfile', $base.'/justfile');
 
         $this->copyDirectory('docker', $base.'/docker');

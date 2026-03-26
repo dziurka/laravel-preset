@@ -40,6 +40,7 @@ class StubFilesTest extends TestCase
             '.env.pipelines pgsql'         => ['.env.pipelines.pgsql'],
             'workflow mysql'               => ['.github/workflows/app.mysql.yml'],
             'workflow pgsql'               => ['.github/workflows/app.pgsql.yml'],
+            'copilot instructions'         => ['.github/copilot-instructions.md'],
 
             // Shared
             'justfile'                     => ['justfile'],
