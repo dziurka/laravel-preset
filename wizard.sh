@@ -104,8 +104,12 @@ UID_GID="$(id -u):$(id -g)"
 # ── Create Laravel project ────────────────────────────────────────────────────
 echo ""
 info "Installing Laravel installer and creating project '${PROJECT_NAME}'..."
-echo -e "  ${YELLOW}(Laravel wizard: answer its questions — choose your starter kit, DB etc.)${NC}"
-echo -e "  ${YELLOW}(When asked 'Would you like to start Sail?' — answer NO, we'll do it next)${NC}"
+echo ""
+echo -e "  ${YELLOW}⚠️  A few things to keep in mind during the Laravel wizard:${NC}"
+echo -e "  ${YELLOW}   • 'Would you like to run the default database migrations?' — answer ${BOLD}No${NC}${YELLOW}${NC}"
+echo -e "  ${YELLOW}     (no database is available yet; migrations run automatically later via 'just install')${NC}"
+echo -e "  ${YELLOW}   • 'Would you like to start Sail?' — answer ${BOLD}No${NC}${YELLOW}${NC}"
+echo -e "  ${YELLOW}     (we start Sail ourselves after preset installation)${NC}"
 echo ""
 
 docker run --rm -it \
