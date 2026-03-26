@@ -16,7 +16,7 @@ task('provision:sudoers', function () {
 // ── System packages ───────────────────────────────────────────────────────────
 
 task('provision:packages', function () {
-    $phpVersion  = get('php_version', '8.2');
+    $phpVersion  = get('php_version', '8.3');
     $dbExtension = get('db_driver', 'mysql') === 'pgsql'
         ? "php{$phpVersion}-pgsql"
         : "php{$phpVersion}-mysql";

@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-# dziurka/laravel-preset
+# laravel-preset
 
-A Composer package that scaffolds a fresh Laravel project with custom configuration, dependencies, and files — in a single command.
-
-## Why?
-
-Maintaining a full Laravel boilerplate repository requires manually comparing files after every Laravel update. This package takes the opposite approach: install it once on a fresh `laravel new` project and let it set everything up.
+A Composer package that scaffolds a fresh Laravel project with custom configuration, dependencies, and files - in a single command.
 
 ## What it installs
 
@@ -259,33 +254,3 @@ Ensure you have `admin` or `write` access to the repository and that `gh auth lo
 
 **Provisioning fails midway**
 Most tasks are idempotent (safe to re-run). Fix the underlying issue and run `just provision staging` again — completed steps will be skipped automatically.
-=======
-# Laravel Boilerplate
-
-## Installation
-
-1. Copy this repository or use it as a template
-2. Install dependencies
-   - make
-   - docker
-   - docker-compose
-   - git
-3. Into project catalog:
-   - `cp .env.example .env`
-   - `make build`
-   - `make install`
-
-## Deploying
-1. Configure `deploy.yaml`
-2. Into docker container (after `make bash`)
-    - `./vendor/bin/dep provision -o remote_user=<your_vps_user> -o become=root` (optionally)
-    - Add your server public SSH Key to Deploys Keys at GitHub
-    - Configure [GitHub](https://github.com/user/repo/secrets/actions) repository secrets:
-        - _KNOWN_HOSTS_PRODUCTION_
-        - _KNOWN_HOSTS_STAGING_
-        - _SSH_KEY_PRODUCTION_
-        - _SSH_KEY_STAGING_
-    - `./vendor/bin/dep deploy`
-
-
->>>>>>> e4ec1e1 (init)

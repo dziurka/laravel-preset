@@ -69,7 +69,7 @@ task('provision:basic-auth', function () {
         $password = get('basic_auth_password', null) ?? askHiddenResponse('Basic auth password:');
         $hashed   = run('caddy hash-password -p '.escapeshellarg($password));
 
-        $phpVersion = get('php_version', '8.2');
+        $phpVersion = get('php_version', '8.3');
         $deployPath = get('deploy_path');
 
         writeAppCaddyConf($caddyFilePath, $hostname, $user, $hashed, $phpVersion, $deployPath);

@@ -53,10 +53,8 @@ class StubFilesTest extends TestCase
             'deploy/provision/system.php'  => ['deploy/provision/system.php'],
 
             // Docker images
-            'docker/8.2/Dockerfile'        => ['docker/8.2/Dockerfile'],
             'docker/8.3/Dockerfile'        => ['docker/8.3/Dockerfile'],
             'docker/8.4/Dockerfile'        => ['docker/8.4/Dockerfile'],
-            'docker/8.2/php.ini'           => ['docker/8.2/php.ini'],
             'docker/8.3/php.ini'           => ['docker/8.3/php.ini'],
             'docker/8.4/php.ini'           => ['docker/8.4/php.ini'],
 
@@ -116,7 +114,7 @@ class StubFilesTest extends TestCase
 
     public function test_dockerfiles_use_python3_not_python2(): void
     {
-        foreach (['8.0', '8.1', '8.2', '8.3', '8.4'] as $version) {
+        foreach (['8.3', '8.4'] as $version) {
             $path = $this->stubsPath."/docker/{$version}/Dockerfile";
 
             if (! file_exists($path)) {

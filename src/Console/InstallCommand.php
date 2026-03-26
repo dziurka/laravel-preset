@@ -39,13 +39,13 @@ class InstallCommand extends Command
 
         $this->phpSail = $this->choice(
             'PHP version for local development (Sail)?',
-            ['8.4', '8.3', '8.2'],
+            ['8.4', '8.3'],
             0,
         );
 
         $this->phpProd = $this->choice(
             'PHP version for the production server?',
-            ['8.4', '8.3', '8.2'],
+            ['8.4', '8.3'],
             0,
         );
 

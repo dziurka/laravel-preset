@@ -9,8 +9,8 @@ config:
   repository:           # REQUIRED: e.g. 'git@github.com:your-org/your-app.git'
   remote_user: deployer
   base_deploy_path: /home/deployer
-  php_fpm_version: '8.2'      # patched by preset:install — must match server PHP-FPM
-  php_version: '8.2'           # patched by preset:install — used by provision:packages
+  php_fpm_version: '8.3'      # patched by preset:install — must match server PHP-FPM
+  php_version: '8.3'           # patched by preset:install — used by provision:packages
   db_driver: mysql             # patched by preset:install — mysql | pgsql
   mailpit_enabled: false       # Mailpit is for local/staging only — never enable on production
   mailpit_port: 8025           # port Mailpit listens on (provision:mailpit)
