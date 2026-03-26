@@ -1,8 +1,9 @@
 # Copilot Instructions
 
-## Architecture
+## Git Workflow
 
-This is a **Laravel** application. Follow Laravel conventions and idioms unless stated otherwise.
+- **Do NOT add `Co-authored-by` trailers** to commit messages
+- **Do NOT push commits automatically** — always let the user push manually
 
 ## Dependency Injection over Facades
 

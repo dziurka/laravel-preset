@@ -13,12 +13,11 @@ php artisan preset:install
 ```
 
 The `preset:install` command:
-1. Installs required Composer prod deps (`inertia-laravel`, `laravel/wayfinder`, `spatie/laravel-data`)
-2. Installs dev deps (`larastan`, `pint`, `ide-helper`, `sail`, `paratest`, `pail`)
-3. Copies stubs: `Makefile`, `docker-compose.yml`, `docker/`, `.env.example`, `.env.pipelines`, `.github/workflows/app.yml`
-4. Patches `.env` / `.env.example` (session/queue/cache/DB drivers)
-5. Adds `@inertiajs/vue3` + `vue` to `package.json`, runs `yarn install`
-6. Optionally installs Deployer + copies `deploy.yaml` + `deploy/`
+1. Installs dev deps (`larastan`, `pint`, `ide-helper`, `sail`, `paratest`, `pail`)
+2. Copies stubs: `docker-compose.yml`, `docker/`, `.env.pipelines`, `.github/workflows/app.yml`, `justfile`
+3. Patches `.env` / `.env.example` (DB, session, queue, cache, redis drivers)
+4. Optionally installs Deployer v8 + copies `deploy.yaml` + `deploy/`
+5. Optionally installs Laravel Boost (AI agent integration)
 
 ### Package structure
 ```
@@ -27,109 +26,81 @@ src/
 └── Console/
     └── InstallCommand.php           # main install logic
 stubs/                               # files copied into the target Laravel project
-├── Makefile
-├── docker-compose.yml
+├── docker-compose.{pgsql,mysql}.yml
 ├── docker/
-├── .env.example
-├── .env.pipelines
-├── .github/workflows/app.yml
+├── justfile
+├── .env.pipelines.{pgsql,mysql}
+├── .github/
+│   ├── copilot-instructions.md
+│   └── workflows/app.{pgsql,mysql}.yml
 └── deploy/                          # optional — installed when user confirms Deployer
-    ├── deploy.yaml
     ├── app.php
-    └── provision.php
+    ├── provision.php
+    └── provision/
+        ├── system.php
+        ├── services.php
+        └── github.php
 ```
 
 ## Stack
 
-- **PHP**: 8.2+ (CI), 8.4 (Docker/Sail)
-- **Laravel**: ^12.0
-- **Frontend**: Inertia.js v2 + Vue, Vite, Yarn
-- **Docker stack**: Laravel Sail (PHP 8.4), MariaDB 10, Redis, Mailpit
-- **Deployment**: Deployer PHP (`./vendor/bin/dep`), Caddy, Supervisor (Horizon + Mailpit)
-- **Queue/Cache**: Redis (cache), database (queue driver), Laravel Horizon (production)
-- **Sessions**: database driver
+- **PHP**: 8.3+ (prod), 8.4 (Docker/Sail)
+- **Laravel**: ^13.0
+- **Frontend**: Inertia.js + Vue, Vite, npm
+- **Docker stack**: Laravel Sail, PostgreSQL or MariaDB, Valkey (Redis-compatible), Mailpit
+- **Deployment**: Deployer PHP v8 (`./vendor/bin/dep`), Caddy, Supervisor (Horizon + Mailpit)
+- **Queue/Cache**: Valkey (Redis), Laravel Horizon (production queue), Redis sessions
 
 ## Key Dependencies
 
-### Production
-- `inertiajs/inertia-laravel` ^2.0
-- `laravel/wayfinder` ^0.1 — typed route helpers for Vue/TS
-- `spatie/laravel-data` ^4 — typed data objects / DTOs
-
-### Dev
+### Dev (installed by preset)
 - `larastan/larastan` ^3 — PHPStan for Laravel
-- `laravel/pint` — code style fixer (Laravel preset)
+- `laravel/pint` — code style fixer
 - `barryvdh/laravel-ide-helper` — IDE model helpers
-- `deployer/deployer` ^7 — deployment automation
+- `laravel/sail` ^1 — local Docker dev
 - `brianium/paratest` — parallel PHPUnit
+- `laravel/pail` — real-time log tailing
+- `deployer/deployer` ^8 — deployment automation (optional)
+- `laravel/boost` — AI agent integration (optional)
 
 ## Commands
 
 All commands use `just` (justfile) with Laravel Sail (`./vendor/bin/sail`).
 
 ```bash
-# First-time setup
 just build                  # Install Composer deps via Docker (no Sail needed)
 just install <project-name> # Full install: configures .env, starts Sail, migrates, seeds
-
-# Daily development
 just up / just down
-just shell                  # Open shell in the app container
-
-# Code quality
-just pint                   # Fix code style (Laravel Pint)
-just pint true              # Dry-run / CI mode (--test)
-just phpstan                # Static analysis (PHPStan/Larastan)
-just lint                   # pint + phpstan
-
-# Testing
-just test                   # Run all tests (parallel)
-just test MyTestClass       # Run a single test / filter
-
-# Pre-commit checklist
-just pre-commit             # fresh migrate → ide-helper → lint → test
-
-# Artisan shortcuts
+just shell
+just pint / just phpstan / just lint
+just test / just test MyTestClass
 just fresh                  # migrate:fresh --seed
-just ide                    # ide-helper:model -M
-just artisan "route:list"   # Run any artisan command
+just pre-commit
 ```
 
-## CI/CD (GitHub Actions — `.github/workflows/app.yml`)
+## CI/CD (GitHub Actions)
 
-- **lint** job: PHPStan + Pint (`--test` mode, no fix)
-- **tests** job: MariaDB service, yarn build, `php artisan test --parallel`
-- **deploy-staging**: triggers on `main` branch push
-- **deploy-production**: triggers on GitHub release publish
-- Environment secrets required: `SSH_KEY_STAGING`, `KNOWN_HOSTS_STAGING`, `SSH_KEY_PRODUCTION`, `KNOWN_HOSTS_PRODUCTION`
-- CI uses `.env.pipelines` (not `.env.example`)
+- **lint** job: PHPStan + Pint (`--test`)
+- **tests** job: DB service, npm ci + build, `php artisan test --parallel`
+- **deploy-staging**: triggers on `main` push
+- **deploy-production**: triggers on GitHub release
+- Secrets: `SSH_KEY_STAGING`, `KNOWN_HOSTS_STAGING`, `SSH_KEY_PRODUCTION`, `KNOWN_HOSTS_PRODUCTION`
 
 ## Deployment (`deploy.yaml` + `deploy/`)
 
-Uses Deployer PHP with two hosts: `staging` and `production`.
+Deployer v8 with two hosts: `staging` and `production`.
 
-```bash
-# Inside container (just shell):
-./vendor/bin/dep provision   # First-time server setup (optional)
-./vendor/bin/dep deploy staging
-./vendor/bin/dep deploy production
-```
-
-Deploy flow: `app:custom-config` → `deploy:vendors` → cache artisan commands → `yarn build` → `php-fpm:reload` → `horizon:terminate` → `supervisorctl restart`.
-
-Server provisioning (`deploy/provision.php`) installs: `php8.2-tidy`, `php8.2-redis`, Yarn, Redis, Mailpit (with Caddy reverse proxy + basic auth), Laravel Horizon via Supervisor.
+Deploy flow: `deploy:prepare` → `deploy:vendors` → artisan cache commands → `npm:install` → `app:frontend` → `deploy:publish` → `php-fpm:reload` → `deploy:horizon` → `deploy:supervisor`.
 
 ## Environment Conventions
 
-- `APP_URL` format: `http://<project>.local` (set during `just install <name>`)
-- `/etc/hosts` entry added automatically by `just install`
-- `SESSION_DRIVER=database`, `QUEUE_CONNECTION=database`, `CACHE_STORE=redis`
-- Docker mounts `~/.ssh` into the container for deployment from within Sail
+- `DB_CONNECTION=pgsql` (default) or `mysql`
+- `REDIS_HOST=valkey`
+- `SESSION_DRIVER=redis`
+- `QUEUE_CONNECTION=horizon`
+- `CACHE_STORE=redis`
 
-## Package Development Notes
+## Git Workflow
 
-When building the Composer package itself:
-- The package entry point will be a Laravel Service Provider
-- Use `Artisan::call()` or `$this->publishes()` for file copying
-- Post-install commands go in the package's `composer.json` `scripts` section or as an artisan command
-- Target: `composer require <vendor>/laravel-scaffolding` on a fresh `laravel new` project
+- **Do NOT add `Co-authored-by` trailers** to commit messages
+- **Do NOT push commits automatically** — always let the user push manually
