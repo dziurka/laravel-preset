@@ -1,5 +1,10 @@
 # laravel-preset
 
+> **New project? Run this in your terminal** (requires Docker):
+> ```bash
+> bash <(curl -sSL https://raw.githubusercontent.com/dziurka/laravel-preset/main/wizard.sh)
+> ```
+
 A Composer package that scaffolds a fresh Laravel project with custom configuration, dependencies, and files - in a single command.
 
 ## What it installs
