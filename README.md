@@ -100,7 +100,6 @@ Add manually when Laravel 13 support is available:
 - **Docker** — the only requirement to run the wizard
 - PHP `^8.3` (Sail provides PHP inside the container)
 - Laravel `^13.0`
-- Yarn (for frontend dependencies)
 
 ---
 

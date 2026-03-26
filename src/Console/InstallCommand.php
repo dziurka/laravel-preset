@@ -53,7 +53,6 @@ class InstallCommand extends Command
             $this->installComposerDependencies();
             $this->copyStubs();
             $this->updateEnvFiles();
-            $this->installFrontendDependencies();
 
             if ($this->confirm('Install Deployer for deployment automation?', false)) {
                 $this->installDeployer();
@@ -199,44 +198,6 @@ class InstallCommand extends Command
         }
     }
 
-    private function installFrontendDependencies(): void
-    {
-        $this->info('🎨 Adding frontend dependencies (Inertia + Vue)...');
-
-        $packageJsonPath = base_path('package.json');
-
-        if (! File::exists($packageJsonPath)) {
-            $this->warn('package.json not found, skipping frontend dependencies.');
-
-            return;
-        }
-
-        $package = json_decode(File::get($packageJsonPath), true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->warn('package.json is invalid ('.json_last_error_msg().'), skipping frontend dependencies.');
-
-            return;
-        }
-
-        $package['dependencies'] = array_merge($package['dependencies'] ?? [], [
-            '@inertiajs/vue3' => '^2.0',
-            'vue' => '^3.5',
-        ]);
-
-        $package['devDependencies'] = array_merge($package['devDependencies'] ?? [], [
-            '@vitejs/plugin-vue' => '^5.2',
-            'vue-tsc' => '^2.2',
-        ]);
-
-        File::put(
-            $packageJsonPath,
-            json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).PHP_EOL
-        );
-
-        $this->info('📦 Running yarn install...');
-        $this->runProcess(['yarn', 'install']);
-    }
 
     private function installDeployer(): void
     {
