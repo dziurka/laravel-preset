@@ -25,7 +25,19 @@ if ! command -v docker &>/dev/null; then
 fi
 
 if ! docker info &>/dev/null 2>&1; then
-    die "Docker daemon is not running. Start Docker and try again."
+    if docker info 2>&1 | grep -q "permission denied"; then
+        echo -e "${RED}✗${NC} Permission denied when accessing Docker socket." >&2
+        echo "" >&2
+        echo -e "  Your user is not in the ${BOLD}docker${NC} group. Fix it with:" >&2
+        echo "" >&2
+        echo -e "    ${BOLD}sudo usermod -aG docker \$USER${NC}" >&2
+        echo -e "    ${BOLD}newgrp docker${NC}   ${CYAN}# apply without re-login${NC}" >&2
+        echo "" >&2
+        echo -e "  Then re-run the wizard." >&2
+        exit 1
+    else
+        die "Docker daemon is not running. Start Docker Desktop (or 'sudo systemctl start docker') and try again."
+    fi
 fi
 
 success "Docker is available."
