@@ -33,7 +33,7 @@ class InstallCommand extends Command
 
         $this->db = $this->choice(
             'Which database driver do you want to use?',
-            ['MySQL / MariaDB', 'PostgreSQL'],
+            ['PostgreSQL', 'MySQL / MariaDB'],
             0,
         );
 
