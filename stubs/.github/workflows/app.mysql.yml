@@ -109,6 +109,13 @@ jobs:
           key: ${{ secrets.SSH_KEY_STAGING }}
           known_hosts: ${{ secrets.KNOWN_HOSTS_STAGING }}
 
+      - name: Check Deployer is installed
+        run: |
+          if [ ! -f ./vendor/bin/dep ]; then
+            echo "::error::Deployer not found. Add deployer/deployer to your composer.json (run: composer require deployer/deployer --dev)"
+            exit 1
+          fi
+
       - name: Deploy
         run: ./vendor/bin/dep deploy staging
 
@@ -134,6 +141,13 @@ jobs:
         with:
           key: ${{ secrets.SSH_KEY_PRODUCTION }}
           known_hosts: ${{ secrets.KNOWN_HOSTS_PRODUCTION }}
+
+      - name: Check Deployer is installed
+        run: |
+          if [ ! -f ./vendor/bin/dep ]; then
+            echo "::error::Deployer not found. Add deployer/deployer to your composer.json (run: composer require deployer/deployer --dev)"
+            exit 1
+          fi
 
       - name: Deploy
         run: ./vendor/bin/dep deploy production
