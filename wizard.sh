@@ -25,18 +25,30 @@ if ! command -v docker &>/dev/null; then
 fi
 
 if ! docker info &>/dev/null 2>&1; then
-    if docker info 2>&1 | grep -q "permission denied"; then
+    # Capture error from both docker info and docker ps (they give different messages)
+    DOCKER_ERR="$(docker info 2>&1 || true) $(docker ps 2>&1 || true)"
+    if echo "$DOCKER_ERR" | grep -qi "permission denied"; then
         echo -e "${RED}✗${NC} Permission denied when accessing Docker socket." >&2
         echo "" >&2
         echo -e "  Your user is not in the ${BOLD}docker${NC} group. Fix it with:" >&2
         echo "" >&2
         echo -e "    ${BOLD}sudo usermod -aG docker \$USER${NC}" >&2
-        echo -e "    ${BOLD}newgrp docker${NC}   ${CYAN}# apply without re-login${NC}" >&2
+        echo -e "    ${BOLD}newgrp docker${NC}   ${CYAN}# apply without re-login (or re-login)${NC}" >&2
         echo "" >&2
         echo -e "  Then re-run the wizard." >&2
         exit 1
     else
-        die "Docker daemon is not running. Start Docker Desktop (or 'sudo systemctl start docker') and try again."
+        echo -e "${RED}✗${NC} Docker daemon is not running." >&2
+        echo "" >&2
+        echo -e "  Start it with one of:" >&2
+        echo -e "    ${BOLD}sudo systemctl start docker${NC}   ${CYAN}# Linux${NC}" >&2
+        echo -e "    Open ${BOLD}Docker Desktop${NC}               ${CYAN}# macOS / Windows${NC}" >&2
+        echo "" >&2
+        echo -e "  Also make sure your user is in the docker group:" >&2
+        echo -e "    ${BOLD}sudo usermod -aG docker \$USER && newgrp docker${NC}" >&2
+        echo "" >&2
+        echo -e "  Then re-run the wizard." >&2
+        exit 1
     fi
 fi
 
