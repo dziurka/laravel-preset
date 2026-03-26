@@ -114,7 +114,10 @@ The installer will ask:
 1. 🗄 **Database driver** — MySQL/MariaDB or PostgreSQL
 2. 🐘 **PHP version (local / Sail)** — 8.4 *(recommended)* or 8.3
 3. 🖥 **PHP version (production)** — 8.4 or 8.3
-4. 🚢 **Deployer** — optional deployment tool installation
+4. 🚢 **Deployer** — optional deployment tool installation. If selected, the installer will also ask:
+   - 📦 Git repository URL (e.g. `git@github.com:your-org/your-app.git`)
+   - 🖥 Production server IP or hostname
+   - 🎭 Staging server IP or hostname
 5. 🤖 **Boost** — AI agent integration setup
 
 ---
@@ -155,7 +158,7 @@ just install myapp  # Full project setup (up, migrate, seed)
 
 ### 1️⃣ Configure deploy.yaml
 
-Fill in `repository` and server addresses:
+`deploy.yaml` is pre-filled with values you entered during `preset:install` (repository URL, server hostnames, PHP version, database driver). Review and adjust if needed:
 
 ```yaml
 config:
@@ -167,6 +170,8 @@ hosts:
   staging:
     hostname: '5.6.7.8'   # staging server IP
 ```
+
+> 💡 If you skipped any field during installation, look for `# REQUIRED` comments in `deploy.yaml`.
 
 > 💡 **Multiple environments on one VPS?** Fully supported! Each environment gets its own:
 > - Deployment directory (`/var/www/myapp-production`, `/var/www/myapp-staging`)
@@ -236,7 +241,8 @@ just secrets staging
 just secrets production
 ```
 
-> 💡 If `gh` is not installed, the `provision:github-secrets` script will offer to install it via [webi.sh](https://webinstall.dev/gh/).
+> 💡 If `gh` is not installed, `provision:github-secrets` will offer to install it via [webi.sh](https://webinstall.dev/gh/).  
+> After installation it will check your authentication status — if you are not logged in, it will pause and display the command to run (`gh auth login`). Once authenticated, press Enter to continue and the secrets will be set automatically.
 
 Secrets set per environment:
 

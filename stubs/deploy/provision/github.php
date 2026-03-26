@@ -104,6 +104,20 @@ task('provision:github-secrets', function () {
     }
 
     if ($ghPath) {
+        writeln('');
+        writeln('<comment>Checking gh authentication status...</comment>');
+        $authCheck = runLocally('gh auth status 2>&1 || true');
+
+        if (! str_contains($authCheck, 'Logged in')) {
+            writeln('');
+            writeln('<comment>⚠️  gh CLI is installed but not authenticated.</comment>');
+            writeln('<info>Please run the following command in your terminal and follow the prompts:</info>');
+            writeln('');
+            writeln('  gh auth login');
+            writeln('');
+            askConfirmation('Press Enter once you have successfully authenticated with gh…');
+        }
+
         applySecretsViaGhCli($privateKey, $pubKey, $knownHosts, $suffix, $hostname, $alias);
     } else {
         printSecretsForManualSetup($privateKey, $pubKey, $knownHosts, $suffix);

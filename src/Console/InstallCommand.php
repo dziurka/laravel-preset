@@ -265,7 +265,62 @@ class InstallCommand extends Command
             '/(?<=db_driver: )\w+/'                    => $this->isPostgres() ? 'pgsql' : 'mysql',
         ]);
 
-        $this->comment('👉 Configure repository and server hostnames in deploy.yaml.');
+        $this->configureDeployYaml($base.'/deploy.yaml');
+    }
+
+    private function configureDeployYaml(string $deployYamlPath): void
+    {
+        $this->newLine();
+        $this->info('⚙️  Configuring deploy.yaml...');
+        $this->comment('You can leave any field empty and fill it in manually later.');
+        $this->newLine();
+
+        $repo = $this->ask('Git repository URL (e.g. git@github.com:your-org/your-app.git)');
+        $prodHost = $this->ask('Production server IP or hostname');
+        $stagingHost = $this->ask('Staging server IP or hostname');
+
+        $replacements = [];
+
+        if ($repo) {
+            $replacements['/^(\s*repository:\s*).*$/m'] = '${1}'."'{$repo}'";
+        }
+
+        if ($prodHost || $stagingHost) {
+            $content = File::get($deployYamlPath);
+
+            if ($prodHost) {
+                // Replace the production hostname line (first occurrence after "production:")
+                $content = preg_replace(
+                    '/^(\s*)(production:\s*\n(?:.*\n)*?\s*hostname:\s*).*$/m',
+                    '${1}${2}'."'{$prodHost}'",
+                    $content,
+                    1,
+                );
+            }
+
+            if ($stagingHost) {
+                // Replace the staging hostname line (second occurrence / after "staging:")
+                $content = preg_replace(
+                    '/^(\s*)(staging:\s*\n(?:.*\n)*?\s*hostname:\s*).*$/m',
+                    '${1}${2}'."'{$stagingHost}'",
+                    $content,
+                    1,
+                );
+            }
+
+            File::put($deployYamlPath, $content);
+        }
+
+        if ($replacements) {
+            $this->patchFile($deployYamlPath, $replacements);
+        }
+
+        $this->newLine();
+        $this->info('✅ deploy.yaml configured.');
+
+        if (! $repo || ! $prodHost) {
+            $this->comment('👉 Remember to fill in any remaining REQUIRED fields in deploy.yaml before deploying.');
+        }
     }
 
     private function installBoost(): void
