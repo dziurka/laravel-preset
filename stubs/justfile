@@ -1,8 +1,9 @@
 # Variables
-uid      := `id -u`
-gid      := `id -g`
-sail     := "USER_UID=" + uid + " ./vendor/bin/sail"
-compose  := "USER_UID=" + uid + " docker compose"
+uid         := `id -u`
+gid         := `id -g`
+compose_bin := if `docker compose version 2>/dev/null` != "" { "docker compose" } else { "docker-compose" }
+compose     := "USER_UID=" + uid + " " + compose_bin
+sail        := "USER_UID=" + uid + " ./vendor/bin/sail"
 
 # Show available commands
 default:
@@ -26,7 +27,7 @@ install name:
     @echo "Updated APP_NAME and APP_URL in .env ({{ name }})"
     grep -q "{{ name }}.local" /etc/hosts \
         || echo "127.0.0.1\t{{ name }}.local" | sudo tee -a /etc/hosts
-    {{ compose }} up -d
+    {{ compose }} up --detach
     {{ sail }} composer install
     {{ sail }} artisan key:generate -n
     just install-front
@@ -41,7 +42,7 @@ install-front:
 
 # Start containers in the background
 up:
-    {{ compose }} up -d
+    {{ compose }} up --detach
 
 # Stop containers
 down:
