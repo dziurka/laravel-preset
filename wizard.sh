@@ -165,6 +165,7 @@ done
 
 docker run --rm -it \
     -u "$UID_GID" \
+    -e COMPOSER_HOME=/tmp/composer \
     -v "$(pwd)/${PROJECT_NAME}:/var/www/html" \
     -w /var/www/html \
     "${COMPOSER_AUTH_DOCKER_FLAGS[@]}" \
