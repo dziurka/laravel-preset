@@ -107,7 +107,7 @@ class InstallCommand extends Command
         $base = base_path();
 
         $this->copyFile("docker-compose.{$db}.yml", $base.'/docker-compose.yml');
-        $this->copyFile(".env.pipelines.{$db}", $base.'/.env.pipelines');
+        $this->copyFile(".env.pipelines", $base.'/.env.pipelines');
         $this->copyFile(".github/workflows/app.{$db}.yml", $base.'/.github/workflows/app.yml');
         $this->copyFile('.github/copilot-instructions.md', $base.'/.github/copilot-instructions.md');
         $this->copyFile('justfile', $base.'/justfile');
@@ -164,7 +164,7 @@ class InstallCommand extends Command
     {
         $this->info('⚙️  Updating .env files...');
 
-        $replacements = $this->isPostgres()
+        $dbReplacements = $this->isPostgres()
             ? [
                 '/^DB_CONNECTION=.*/m' => 'DB_CONNECTION=pgsql',
                 '/^DB_HOST=.*/m'       => 'DB_HOST=pgsql',
@@ -176,15 +176,31 @@ class InstallCommand extends Command
                 '/^DB_PORT=.*/m'       => 'DB_PORT=3306',
             ];
 
-        $replacements = array_merge($replacements, [
+        // Common patches for local dev (.env / .env.example)
+        $localReplacements = array_merge($dbReplacements, [
+            '/^DB_USERNAME=.*/m'      => 'DB_USERNAME=sail',
+            '/^DB_PASSWORD=.*/m'      => 'DB_PASSWORD=password',
             '/^SESSION_DRIVER=.*/m'   => 'SESSION_DRIVER=redis',
             '/^QUEUE_CONNECTION=.*/m' => 'QUEUE_CONNECTION=horizon',
             '/^CACHE_STORE=.*/m'      => 'CACHE_STORE=redis',
             '/^REDIS_HOST=.*/m'       => 'REDIS_HOST=valkey',
+            '/^MAIL_MAILER=.*/m'      => 'MAIL_MAILER=smtp',
             '/^MAIL_HOST=.*/m'        => 'MAIL_HOST=mailpit',
+            '/^MAIL_PORT=.*/m'        => 'MAIL_PORT=1025',
         ]);
 
-        foreach (['.env', '.env.example'] as $filename) {
+        // Pipeline patches: same DB driver, but CI-specific values
+        $pipelineReplacements = array_merge($dbReplacements, [
+            '/^DB_HOST=.*/m' => 'DB_HOST=127.0.0.1',
+        ]);
+
+        $this->applyEnvReplacements(['.env', '.env.example'], $localReplacements);
+        $this->applyEnvReplacements(['.env.pipelines'], $pipelineReplacements);
+    }
+
+    private function applyEnvReplacements(array $filenames, array $replacements): void
+    {
+        foreach ($filenames as $filename) {
             $path = base_path($filename);
 
             if (! File::exists($path)) {
