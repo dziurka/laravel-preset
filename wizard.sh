@@ -148,7 +148,7 @@ echo -e "  ${YELLOW}(You'll be asked about DB driver, PHP version etc.)${NC}"
 echo ""
 
 if [[ "$PRESET_DEV" == true ]]; then
-    COMPOSER_REQUIRE="composer config repositories.laravel-preset vcs https://github.com/dziurka/laravel-preset && composer config minimum-stability dev && composer config prefer-stable true && composer require '${PRESET_PACKAGE}:dev-main' --dev --no-interaction --quiet"
+    COMPOSER_REQUIRE="composer config repositories.laravel-preset '{\"type\":\"vcs\",\"url\":\"https://github.com/dziurka/laravel-preset\",\"no-api\":true}' && composer config minimum-stability dev && composer config prefer-stable true && composer require '${PRESET_PACKAGE}:dev-main' --dev --no-interaction --quiet"
 else
     COMPOSER_REQUIRE="composer require '${PRESET_PACKAGE}' --dev --no-interaction --quiet"
 fi
