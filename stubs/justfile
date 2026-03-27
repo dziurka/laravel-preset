@@ -1,7 +1,8 @@
 # Variables
-uid  := `id -u`
-gid  := `id -g`
-sail := "USER_UID=" + uid + " ./vendor/bin/sail"
+uid      := `id -u`
+gid      := `id -g`
+sail     := "USER_UID=" + uid + " ./vendor/bin/sail"
+compose  := "USER_UID=" + uid + " docker compose"
 
 # Show available commands
 default:
@@ -25,7 +26,7 @@ install name:
     @echo "Updated APP_NAME and APP_URL in .env ({{ name }})"
     grep -q "{{ name }}.local" /etc/hosts \
         || echo "127.0.0.1\t{{ name }}.local" | sudo tee -a /etc/hosts
-    {{ sail }} up -d
+    {{ compose }} up -d
     {{ sail }} composer install
     {{ sail }} artisan key:generate -n
     just install-front
@@ -33,18 +34,18 @@ install name:
 
 # Install / rebuild frontend assets
 install-front:
-    {{ sail }} yarn install --non-interactive
-    {{ sail }} yarn run --non-interactive build
+    {{ sail }} npm install
+    {{ sail }} npm run build
 
 # ── Docker ───────────────────────────────────────────────────────────────────
 
 # Start containers in the background
 up:
-    {{ sail }} up -d
+    {{ compose }} up -d
 
 # Stop containers
 down:
-    {{ sail }} stop
+    {{ compose }} stop
 
 # Open a shell in the app container
 shell:
