@@ -1,7 +1,7 @@
 # Variables
 uid         := `id -u`
 gid         := `id -g`
-compose_bin := if `docker compose version 2>/dev/null` != "" { "docker compose" } else { "docker-compose" }
+compose_bin := if `docker compose version 2>/dev/null || true` != "" { "docker compose" } else { "docker-compose" }
 compose     := "USER_UID=" + uid + " " + compose_bin
 sail        := "USER_UID=" + uid + " ./vendor/bin/sail"
 
