@@ -11,7 +11,7 @@ default:
 
 # ── Installation ─────────────────────────────────────────────────────────────
 
-# Install Composer deps via Docker (no local PHP/Composer needed)
+# Install Composer deps via Docker (no local PHP/Composer needed). Run before `just install`.
 build:
     docker run --rm \
         -u "{{ uid }}:{{ gid }}" \
@@ -31,7 +31,6 @@ install name:
     grep -q "{{ name }}.local" /etc/hosts \
         || echo "127.0.0.1\t{{ name }}.local" | sudo tee -a /etc/hosts
     {{ compose }} up --detach
-    {{ sail }} composer install
     {{ sail }} artisan key:generate -n
     just install-front
     {{ sail }} artisan migrate:fresh --seed
