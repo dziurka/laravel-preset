@@ -33,7 +33,7 @@ install name:
     @echo "Updated APP_NAME, APP_URL, WWWUSER and WWWGROUP in .env ({{ name }})"
     grep -q "{{ name }}.local" /etc/hosts \
         || echo "127.0.0.1\t{{ name }}.local" | sudo tee -a /etc/hosts
-    {{ compose }} up --detach
+    {{ compose }} up --detach --wait
     {{ sail }} artisan key:generate -n
     just install-front
     {{ sail }} artisan migrate:fresh --seed
