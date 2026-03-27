@@ -66,6 +66,25 @@ fi
 
 success "Docker is available."
 
+# ── Preflight: docker compose ─────────────────────────────────────────────────
+if command -v docker-compose &>/dev/null; then
+    COMPOSE_CMD="docker-compose"
+elif docker compose version &>/dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+else
+    echo -e "${RED}✗${NC} Docker Compose is not installed." >&2
+    echo "" >&2
+    echo -e "  Install it with one of:" >&2
+    echo -e "    ${BOLD}sudo pacman -S docker-compose${NC}        ${CYAN}# Arch Linux${NC}" >&2
+    echo -e "    ${BOLD}sudo apt-get install docker-compose-v2${NC} ${CYAN}# Ubuntu/Debian${NC}" >&2
+    echo -e "    ${BOLD}brew install docker-compose${NC}          ${CYAN}# macOS${NC}" >&2
+    echo "" >&2
+    echo -e "  Then re-run the wizard." >&2
+    exit 1
+fi
+
+success "Docker Compose is available (${COMPOSE_CMD})."
+
 # ── Preflight: just ───────────────────────────────────────────────────────────
 if ! command -v just &>/dev/null; then
     warn "'just' command runner is not installed."
