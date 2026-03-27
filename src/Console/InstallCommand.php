@@ -12,7 +12,7 @@ class InstallCommand extends Command
 
     protected $description = 'Install the dziurka/laravel-preset scaffolding into a fresh Laravel project';
 
-    private string $stubsPath;
+    use HasPresetHelpers;
 
     private string $db;
 
@@ -23,7 +23,7 @@ class InstallCommand extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->stubsPath = realpath(__DIR__.'/../../stubs');
+        $this->initStubsPath();
     }
 
     public function handle(): int
@@ -55,7 +55,10 @@ class InstallCommand extends Command
             $this->updateEnvFiles();
 
             if ($this->confirm('Install Deployer for deployment automation?', false)) {
-                $this->installDeployer();
+                $this->call('preset:deployer', [
+                    '--php-version' => $this->phpProd,
+                    '--db'          => $this->isPostgres() ? 'pgsql' : 'mysql',
+                ]);
             }
 
             $this->installBoost();
@@ -198,81 +201,6 @@ class InstallCommand extends Command
         }
     }
 
-
-    private function installDeployer(): void
-    {
-        $this->info('🚢 Installing Deployer...');
-
-        $this->runComposer(['require', '--dev', 'deployer/deployer:^8.0']);
-
-        $base = base_path();
-        $this->copyFile('deploy.yaml', $base.'/deploy.yaml');
-        $this->copyDirectory('deploy', $base.'/deploy');
-
-        $this->patchFile($base.'/deploy.yaml', [
-            "/(?<=php_fpm_version: ')[0-9]+\.[0-9]+/" => $this->phpProd,
-            "/(?<=php_version: ')[0-9]+\.[0-9]+/"     => $this->phpProd,
-            '/(?<=db_driver: )\w+/'                    => $this->isPostgres() ? 'pgsql' : 'mysql',
-        ]);
-
-        $this->configureDeployYaml($base.'/deploy.yaml');
-    }
-
-    private function configureDeployYaml(string $deployYamlPath): void
-    {
-        $this->newLine();
-        $this->info('⚙️  Configuring deploy.yaml...');
-        $this->comment('You can leave any field empty and fill it in manually later.');
-        $this->newLine();
-
-        $repo = $this->ask('Git repository URL (e.g. git@github.com:your-org/your-app.git)');
-        $prodHost = $this->ask('Production server IP or hostname');
-        $stagingHost = $this->ask('Staging server IP or hostname');
-
-        $replacements = [];
-
-        if ($repo) {
-            $replacements['/^(\s*repository:\s*).*$/m'] = '${1}'."'{$repo}'";
-        }
-
-        if ($prodHost || $stagingHost) {
-            $content = File::get($deployYamlPath);
-
-            if ($prodHost) {
-                // Replace the production hostname line (first occurrence after "production:")
-                $content = preg_replace(
-                    '/^(\s*)(production:\s*\n(?:.*\n)*?\s*hostname:\s*).*$/m',
-                    '${1}${2}'."'{$prodHost}'",
-                    $content,
-                    1,
-                );
-            }
-
-            if ($stagingHost) {
-                // Replace the staging hostname line (second occurrence / after "staging:")
-                $content = preg_replace(
-                    '/^(\s*)(staging:\s*\n(?:.*\n)*?\s*hostname:\s*).*$/m',
-                    '${1}${2}'."'{$stagingHost}'",
-                    $content,
-                    1,
-                );
-            }
-
-            File::put($deployYamlPath, $content);
-        }
-
-        if ($replacements) {
-            $this->patchFile($deployYamlPath, $replacements);
-        }
-
-        $this->newLine();
-        $this->info('✅ deploy.yaml configured.');
-
-        if (! $repo || ! $prodHost) {
-            $this->comment('👉 Remember to fill in any remaining REQUIRED fields in deploy.yaml before deploying.');
-        }
-    }
-
     private function installBoost(): void
     {
         $this->info('🤖 Installing Laravel Boost (AI agent integration)...');
@@ -285,71 +213,5 @@ class InstallCommand extends Command
 
         $this->runProcess(['php', 'artisan', 'boost:install']);
     }
-
-    private function patchFile(string $path, array $replacements): void
-    {
-        if (! File::exists($path)) {
-            return;
-        }
-
-        $content = File::get($path);
-        $patched = preg_replace(array_keys($replacements), array_values($replacements), $content);
-
-        if ($patched !== $content) {
-            File::put($path, $patched);
-        }
-    }
-
-    private function runComposer(array $arguments): void
-    {
-        $this->runProcess(array_merge(['composer'], $arguments));
-    }
-
-    private function runProcess(array $command): void
-    {
-        $process = new Process($command, base_path());
-        $process->setTimeout(null);
-
-        $process->run(function (string $type, string $output): void {
-            $this->output->write($output);
-        });
-
-        if (! $process->isSuccessful()) {
-            throw new \RuntimeException('Command failed: '.implode(' ', $command));
-        }
-    }
-
-    private function copyFile(string $stub, string $destination): void
-    {
-        $source = $this->stubsPath.'/'.$stub;
-
-        if (! File::exists($source)) {
-            return;
-        }
-
-        File::ensureDirectoryExists(dirname($destination));
-
-        $relative = str_replace(base_path().'/', '', $destination);
-
-        if (File::exists($destination) && ! $this->confirm("  {$relative} already exists. Overwrite?", false)) {
-            return;
-        }
-
-        File::copy($source, $destination);
-        $this->line("  <info>+</info> {$relative}");
-    }
-
-    private function copyDirectory(string $stub, string $destination): void
-    {
-        $source = $this->stubsPath.'/'.$stub;
-
-        if (! File::isDirectory($source)) {
-            return;
-        }
-
-        File::copyDirectory($source, $destination);
-
-        $relative = str_replace(base_path().'/', '', $destination);
-        $this->line("  <info>+</info> {$relative}/");
-    }
 }
+
