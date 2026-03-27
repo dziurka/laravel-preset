@@ -30,9 +30,12 @@ install name:
     grep -q "^WWWGROUP=" .env \
         && sed -i "s|^WWWGROUP=.*|WWWGROUP={{ gid }}|" .env \
         || echo "WWWGROUP={{ gid }}" >> .env
-    @echo "Updated APP_NAME, APP_URL, WWWUSER and WWWGROUP in .env ({{ name }})"
+    grep -qE "^DB_PASSWORD=.+" .env \
+        || sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=password|" .env
+    @echo "Updated APP_NAME, APP_URL, WWWUSER, WWWGROUP and DB_PASSWORD in .env ({{ name }})"
     grep -q "{{ name }}.local" /etc/hosts \
         || echo "127.0.0.1\t{{ name }}.local" | sudo tee -a /etc/hosts
+    {{ compose }} down --volumes --remove-orphans 2>/dev/null || true
     {{ compose }} up --detach --wait
     {{ sail }} artisan key:generate -n
     just install-front
