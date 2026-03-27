@@ -153,22 +153,11 @@ else
     COMPOSER_REQUIRE="composer require '${PRESET_PACKAGE}' --dev --no-interaction --quiet"
 fi
 
-# Pass host Composer auth into the container so private packages and GitHub API
-# rate-limited requests work without re-authenticating inside Docker.
-COMPOSER_AUTH_DOCKER_FLAGS=()
-for _auth_file in "$HOME/.config/composer/auth.json" "$HOME/.composer/auth.json"; do
-    if [[ -f "$_auth_file" ]]; then
-        COMPOSER_AUTH_DOCKER_FLAGS=(-e "COMPOSER_AUTH=$(tr -d '\n' < "$_auth_file")")
-        break
-    fi
-done
-
 docker run --rm -it \
     -u "$UID_GID" \
     -e COMPOSER_HOME=/tmp/composer \
     -v "$(pwd)/${PROJECT_NAME}:/var/www/html" \
     -w /var/www/html \
-    "${COMPOSER_AUTH_DOCKER_FLAGS[@]}" \
     "$PHP_IMAGE" \
     bash -c "
         ${COMPOSER_REQUIRE}
