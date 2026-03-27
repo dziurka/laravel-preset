@@ -34,7 +34,7 @@ install name:
         || sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=password|" .env
     @echo "Updated APP_NAME, APP_URL, WWWUSER, WWWGROUP and DB_PASSWORD in .env ({{ name }})"
     grep -q "{{ name }}.local" /etc/hosts \
-        || echo "127.0.0.1\t{{ name }}.local" | sudo tee -a /etc/hosts
+        || printf "127.0.0.1\t%s\n" "{{ name }}.local" | sudo tee -a /etc/hosts
     {{ compose }} down --volumes --remove-orphans 2>/dev/null || true
     {{ compose }} up --detach --wait
     {{ sail }} artisan key:generate -n
