@@ -42,6 +42,7 @@ class StubFilesTest extends TestCase
             'justfile' => ['justfile'],
             'phpstan.neon' => ['phpstan.neon'],
             'deploy.yaml' => ['deploy.yaml'],
+            '.githooks/pre-commit' => ['.githooks/pre-commit'],
 
             // Deployer scripts
             'deploy/app.php' => ['deploy/app.php'],

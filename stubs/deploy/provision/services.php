@@ -11,9 +11,9 @@ task('provision:mailpit', function () {
         return;
     }
 
-    $mailpitBin          = '/usr/local/bin/mailpit';
-    $supervisorConfPath  = '/etc/supervisor/conf.d/mailpit.conf';
-    $caddyFilePath       = '/etc/caddy/mailpit.Caddyfile';
+    $mailpitBin = '/usr/local/bin/mailpit';
+    $supervisorConfPath = '/etc/supervisor/conf.d/mailpit.conf';
+    $caddyFilePath = '/etc/caddy/mailpit.Caddyfile';
 
     // Install binary
     if (! test("[ -f $mailpitBin ]")) {
@@ -33,9 +33,9 @@ task('provision:mailpit', function () {
     if (! test("grep -q 'import $caddyFilePath' /etc/caddy/Caddyfile")) {
         info('Configuring Caddy reverse proxy for Mailpit...');
 
-        $basicAuthUser     = get('mailpit_user', null)     ?? ask('Mailpit basic auth username:');
+        $basicAuthUser = get('mailpit_user', null) ?? ask('Mailpit basic auth username:');
         $basicAuthPassword = get('mailpit_password', null) ?? askHiddenResponse('Mailpit basic auth password:');
-        $hashedPassword    = runMailpitHashPassword($basicAuthPassword);
+        $hashedPassword = runMailpitHashPassword($basicAuthPassword);
 
         $hostname = get('hostname');
         writeCaddyConf($caddyFilePath, "mailpit.$hostname", get('mailpit_port', 8025), $basicAuthUser, $hashedPassword);
@@ -58,16 +58,16 @@ task('provision:basic-auth', function () {
         return;
     }
 
-    $hostname      = get('hostname');
-    $alias         = currentHost()->getAlias();
+    $hostname = get('hostname');
+    $alias = currentHost()->getAlias();
     $caddyFilePath = "/etc/caddy/app-{$alias}.Caddyfile";
 
     if (! test("grep -q 'import $caddyFilePath' /etc/caddy/Caddyfile")) {
         info('Configuring Caddy basic auth for app...');
 
-        $user     = get('basic_auth_user', null)     ?? ask('Basic auth username:');
+        $user = get('basic_auth_user', null) ?? ask('Basic auth username:');
         $password = get('basic_auth_password', null) ?? askHiddenResponse('Basic auth password:');
-        $hashed   = run('caddy hash-password -p '.escapeshellarg($password));
+        $hashed = run('caddy hash-password -p '.escapeshellarg($password));
 
         $phpVersion = get('php_version', '8.3');
         $deployPath = get('deploy_path');
@@ -88,8 +88,8 @@ task('provision:basic-auth', function () {
 task('provision:horizon', function () {
     // Each environment gets its own supervisor program so staging and production
     // can coexist on the same server without stomping each other's config.
-    $alias              = currentHost()->getAlias();
-    $programName        = "horizon-{$alias}";
+    $alias = currentHost()->getAlias();
+    $programName = "horizon-{$alias}";
     $supervisorConfPath = "/etc/supervisor/conf.d/{$programName}.conf";
 
     run('sudo apt-get install -y supervisor');
@@ -169,7 +169,7 @@ function writeAppCaddyConf(
 function writeRemoteFile(string $path, string $content, bool $sudo): void
 {
     $escaped = escapeshellarg($content);
-    $prefix  = $sudo ? 'sudo ' : '';
+    $prefix = $sudo ? 'sudo ' : '';
 
     run("{$prefix}sh -c \"printf '%s' $escaped > $path\"");
 }

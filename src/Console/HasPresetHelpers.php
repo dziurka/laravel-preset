@@ -116,4 +116,30 @@ trait HasPresetHelpers
             File::put($path, $patched);
         }
     }
+
+    private function installGitHooks(bool $safe = false): void
+    {
+        $hookFile = base_path().'/.githooks/pre-commit';
+
+        if ($safe && File::exists($hookFile) && ! str_contains(File::get($hookFile), 'just ci-check')) {
+            $this->warn('⚠️  Custom pre-commit hook detected in .githooks/pre-commit — skipping hook installation.');
+
+            return;
+        }
+
+        $source = $this->stubsPath.'/.githooks/pre-commit';
+
+        if (! File::exists($source)) {
+            return;
+        }
+
+        File::ensureDirectoryExists(base_path().'/.githooks');
+        File::copy($source, $hookFile);
+        chmod($hookFile, 0755);
+
+        exec('git config core.hooksPath .githooks');
+
+        $this->line('  <info>+</info> .githooks/pre-commit');
+        $this->line('  <info>✓</info> git config core.hooksPath .githooks');
+    }
 }

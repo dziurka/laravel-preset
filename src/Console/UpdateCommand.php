@@ -23,6 +23,7 @@ final class UpdateCommand extends Command
         'copilot' => '.github/copilot-instructions.md',
         'justfile' => 'justfile',
         'phpstan' => 'phpstan.neon',
+        'githooks' => '.githooks/pre-commit',
         'docker' => 'docker/ (directory)',
     ];
 
@@ -107,6 +108,10 @@ final class UpdateCommand extends Command
 
         if (in_array('phpstan', $selected)) {
             $this->copyFile('phpstan.neon', $base.'/phpstan.neon');
+        }
+
+        if (in_array('githooks', $selected)) {
+            $this->installGitHooks(safe: true);
         }
 
         if (in_array('docker', $selected)) {

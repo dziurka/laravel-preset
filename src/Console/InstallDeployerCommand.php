@@ -80,8 +80,8 @@ class InstallDeployerCommand extends Command
 
         $this->patchFile($base.'/deploy.yaml', [
             "/(?<=php_fpm_version: ')[0-9]+\.[0-9]+/" => $this->phpProd,
-            "/(?<=php_version: ')[0-9]+\.[0-9]+/"     => $this->phpProd,
-            '/(?<=db_driver: )\w+/'                    => $this->isPostgres() ? 'pgsql' : 'mysql',
+            "/(?<=php_version: ')[0-9]+\.[0-9]+/" => $this->phpProd,
+            '/(?<=db_driver: )\w+/' => $this->isPostgres() ? 'pgsql' : 'mysql',
         ]);
 
         $this->configureDeployYaml($base.'/deploy.yaml');
@@ -94,8 +94,8 @@ class InstallDeployerCommand extends Command
         $this->comment('You can leave any field empty and fill it in manually later.');
         $this->newLine();
 
-        $repo        = $this->ask('Git repository URL (e.g. git@github.com:your-org/your-app.git)');
-        $prodHost    = $this->ask('Production server IP or hostname');
+        $repo = $this->ask('Git repository URL (e.g. git@github.com:your-org/your-app.git)');
+        $prodHost = $this->ask('Production server IP or hostname');
         $stagingHost = $this->ask('Staging server IP or hostname');
 
         $replacements = [];

@@ -16,7 +16,7 @@ class PatchingTest extends TestCase
     public function test_docker_context_path_is_replaced(): void
     {
         $content = 'context: ./docker/8.4';
-        $result  = preg_replace('/(docker\/)\d+\.\d+/', '${1}8.3', $content);
+        $result = preg_replace('/(docker\/)\d+\.\d+/', '${1}8.3', $content);
 
         $this->assertSame('context: ./docker/8.3', $result);
     }
@@ -24,7 +24,7 @@ class PatchingTest extends TestCase
     public function test_sail_image_version_is_replaced(): void
     {
         $content = 'image: sail-8.4/app';
-        $result  = preg_replace('/(sail-)\d+\.\d+(\/app)/', '${1}8.3${2}', $content);
+        $result = preg_replace('/(sail-)\d+\.\d+(\/app)/', '${1}8.3${2}', $content);
 
         $this->assertSame('image: sail-8.3/app', $result);
     }
@@ -34,7 +34,7 @@ class PatchingTest extends TestCase
     public function test_justfile_composer_image_version_is_replaced(): void
     {
         $content = 'laravelsail/php84-composer:latest';
-        $result  = preg_replace('/(?<=php)\d+(?=-composer)/', '83', $content);
+        $result = preg_replace('/(?<=php)\d+(?=-composer)/', '83', $content);
 
         $this->assertSame('laravelsail/php83-composer:latest', $result);
     }
@@ -44,7 +44,7 @@ class PatchingTest extends TestCase
     public function test_workflow_php_version_is_replaced(): void
     {
         $content = "php-version: '8.2'";
-        $result  = preg_replace("/(?<=php-version: ')\d+\.\d+/", '8.4', $content);
+        $result = preg_replace("/(?<=php-version: ')\d+\.\d+/", '8.4', $content);
 
         $this->assertSame("php-version: '8.4'", $result);
     }
@@ -52,7 +52,7 @@ class PatchingTest extends TestCase
     public function test_deploy_yaml_php_fpm_version_is_replaced(): void
     {
         $content = "php_fpm_version: '8.2'";
-        $result  = preg_replace("/(?<=php_fpm_version: ')\d+\.\d+/", '8.4', $content);
+        $result = preg_replace("/(?<=php_fpm_version: ')\d+\.\d+/", '8.4', $content);
 
         $this->assertSame("php_fpm_version: '8.4'", $result);
     }
@@ -60,7 +60,7 @@ class PatchingTest extends TestCase
     public function test_deploy_yaml_php_version_is_replaced(): void
     {
         $content = "php_version: '8.2'";
-        $result  = preg_replace("/(?<=php_version: ')\d+\.\d+/", '8.4', $content);
+        $result = preg_replace("/(?<=php_version: ')\d+\.\d+/", '8.4', $content);
 
         $this->assertSame("php_version: '8.4'", $result);
     }
@@ -68,7 +68,7 @@ class PatchingTest extends TestCase
     public function test_deploy_yaml_db_driver_is_replaced(): void
     {
         $content = 'db_driver: mysql';
-        $result  = preg_replace('/(?<=db_driver: )\w+/', 'pgsql', $content);
+        $result = preg_replace('/(?<=db_driver: )\w+/', 'pgsql', $content);
 
         $this->assertSame('db_driver: pgsql', $result);
     }
@@ -76,7 +76,7 @@ class PatchingTest extends TestCase
     public function test_deploy_yaml_db_driver_defaults_to_mysql(): void
     {
         $content = 'db_driver: mysql';
-        $result  = preg_replace('/(?<=db_driver: )\w+/', 'mysql', $content);
+        $result = preg_replace('/(?<=db_driver: )\w+/', 'mysql', $content);
 
         $this->assertSame('db_driver: mysql', $result);
     }
@@ -93,7 +93,7 @@ class PatchingTest extends TestCase
         ]);
 
         $result = preg_replace("/(?<=php-version: ')\d+\.\d+/", '8.4', $content);
-        $count  = substr_count($result, "php-version: '8.4'");
+        $count = substr_count($result, "php-version: '8.4'");
 
         $this->assertSame(4, $count);
     }

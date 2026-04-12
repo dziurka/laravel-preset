@@ -16,7 +16,7 @@ task('deploy:env', [
 
 task('deploy:env:copy', function () {
     $envExample = '{{release_or_current_path}}/.env.example';
-    $sharedEnv  = '{{deploy_path}}/shared/.env';
+    $sharedEnv = '{{deploy_path}}/shared/.env';
 
     if (! test("[[ -f $envExample ]]")) {
         warning('.env.example not found — skipping env copy.');
@@ -76,5 +76,3 @@ task('deploy:supervisor', function () {
     run("sudo supervisorctl restart $services");
     info('Supervisor services restarted.');
 });
-
-
