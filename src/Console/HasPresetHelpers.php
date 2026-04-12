@@ -80,4 +80,40 @@ trait HasPresetHelpers
         $relative = str_replace(base_path().'/', '', $destination);
         $this->line("  <info>+</info> {$relative}/");
     }
+
+    private function patchDockerCompose(string $path, string $phpVersion): void
+    {
+        if (! File::exists($path)) {
+            return;
+        }
+
+        $nodots = str_replace('.', '', $phpVersion);
+        $content = File::get($path);
+
+        $patched = preg_replace(
+            ["/(?<=docker\/)[0-9]+\.[0-9]+/", "/(?<=sail-)[0-9]+\.[0-9]+(?=\/app)/"],
+            [$phpVersion, $nodots],
+            $content,
+        );
+
+        if ($patched !== $content) {
+            File::put($path, $patched);
+        }
+    }
+
+    private function patchJustfile(string $path, string $phpVersion): void
+    {
+        if (! File::exists($path)) {
+            return;
+        }
+
+        $nodots = str_replace('.', '', $phpVersion);
+        $content = File::get($path);
+
+        $patched = preg_replace('/(?<=php)\d+(?=-composer)/', $nodots, $content);
+
+        if ($patched !== $content) {
+            File::put($path, $patched);
+        }
+    }
 }
