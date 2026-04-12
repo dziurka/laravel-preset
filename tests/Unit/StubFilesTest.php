@@ -32,36 +32,32 @@ class StubFilesTest extends TestCase
     {
         return [
             // Database variants
-            'docker-compose mysql'         => ['docker-compose.mysql.yml'],
-            'docker-compose pgsql'         => ['docker-compose.pgsql.yml'],
-            '.env.example mysql'           => ['.env.example.mysql'],
-            '.env.example pgsql'           => ['.env.example.pgsql'],
-            '.env.pipelines mysql'         => ['.env.pipelines.mysql'],
-            '.env.pipelines pgsql'         => ['.env.pipelines.pgsql'],
-            'workflow mysql'               => ['.github/workflows/app.mysql.yml'],
-            'workflow pgsql'               => ['.github/workflows/app.pgsql.yml'],
-            'copilot instructions'         => ['.github/copilot-instructions.md'],
+            'docker-compose mysql' => ['docker-compose.mysql.yml'],
+            'docker-compose pgsql' => ['docker-compose.pgsql.yml'],
+            'workflow mysql' => ['.github/workflows/app.mysql.yml'],
+            'workflow pgsql' => ['.github/workflows/app.pgsql.yml'],
+            'copilot instructions' => ['.github/copilot-instructions.md'],
 
             // Shared
-            'justfile'                     => ['justfile'],
-            'deploy.yaml'                  => ['deploy.yaml'],
+            'justfile' => ['justfile'],
+            'deploy.yaml' => ['deploy.yaml'],
 
             // Deployer scripts
-            'deploy/app.php'               => ['deploy/app.php'],
-            'deploy/provision.php'         => ['deploy/provision.php'],
-            'deploy/provision/github.php'  => ['deploy/provision/github.php'],
-            'deploy/provision/services.php'=> ['deploy/provision/services.php'],
-            'deploy/provision/system.php'  => ['deploy/provision/system.php'],
+            'deploy/app.php' => ['deploy/app.php'],
+            'deploy/provision.php' => ['deploy/provision.php'],
+            'deploy/provision/github.php' => ['deploy/provision/github.php'],
+            'deploy/provision/services.php' => ['deploy/provision/services.php'],
+            'deploy/provision/system.php' => ['deploy/provision/system.php'],
 
             // Docker images
-            'docker/8.3/Dockerfile'        => ['docker/8.3/Dockerfile'],
-            'docker/8.4/Dockerfile'        => ['docker/8.4/Dockerfile'],
-            'docker/8.3/php.ini'           => ['docker/8.3/php.ini'],
-            'docker/8.4/php.ini'           => ['docker/8.4/php.ini'],
+            'docker/8.3/Dockerfile' => ['docker/8.3/Dockerfile'],
+            'docker/8.4/Dockerfile' => ['docker/8.4/Dockerfile'],
+            'docker/8.3/php.ini' => ['docker/8.3/php.ini'],
+            'docker/8.4/php.ini' => ['docker/8.4/php.ini'],
 
             // DB init scripts
-            'docker/mysql/create-testing-database.sh'  => ['docker/mysql/create-testing-database.sh'],
-            'docker/mariadb/create-testing-database.sh'=> ['docker/mariadb/create-testing-database.sh'],
+            'docker/mysql/create-testing-database.sh' => ['docker/mysql/create-testing-database.sh'],
+            'docker/mariadb/create-testing-database.sh' => ['docker/mariadb/create-testing-database.sh'],
             'docker/pgsql/create-testing-database.sql' => ['docker/pgsql/create-testing-database.sql'],
         ];
     }

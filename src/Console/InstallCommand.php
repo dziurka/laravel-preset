@@ -4,7 +4,6 @@ namespace Dziurka\LaravelPreset\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Symfony\Component\Process\Process;
 
 class InstallCommand extends Command
 {
@@ -57,7 +56,7 @@ class InstallCommand extends Command
             if ($this->confirm('Install Deployer for deployment automation?', false)) {
                 $this->call('preset:deployer', [
                     '--php-version' => $this->phpProd,
-                    '--db'          => $this->isPostgres() ? 'pgsql' : 'mysql',
+                    '--db' => $this->isPostgres() ? 'pgsql' : 'mysql',
                 ]);
             }
 
@@ -103,61 +102,24 @@ class InstallCommand extends Command
     {
         $this->info('📁 Copying configuration files...');
 
-        $db   = $this->isPostgres() ? 'pgsql' : 'mysql';
+        $db = $this->isPostgres() ? 'pgsql' : 'mysql';
         $base = base_path();
 
         $this->copyFile("docker-compose.{$db}.yml", $base.'/docker-compose.yml');
-        $this->copyFile(".env.pipelines", $base.'/.env.pipelines');
+        $this->copyFile('.env.pipelines', $base.'/.env.pipelines');
         $this->copyFile(".github/workflows/app.{$db}.yml", $base.'/.github/workflows/app.yml');
         $this->copyFile('.github/copilot-instructions.md', $base.'/.github/copilot-instructions.md');
         $this->copyFile('justfile', $base.'/justfile');
 
         $this->copyDirectory('docker', $base.'/docker');
 
-        $this->patchDockerCompose($base.'/docker-compose.yml');
-        $this->patchJustfile($base.'/justfile');
+        $this->patchDockerCompose($base.'/docker-compose.yml', $this->phpSail);
+        $this->patchJustfile($base.'/justfile', $this->phpSail);
 
         // CI workflow mirrors production PHP version
         $this->patchFile($base.'/.github/workflows/app.yml', [
             "/(?<=php-version: ')[0-9]+\.[0-9]+/" => $this->phpProd,
         ]);
-    }
-
-    private function patchDockerCompose(string $path): void
-    {
-        if (! File::exists($path)) {
-            return;
-        }
-
-        $nodots  = str_replace('.', '', $this->phpSail);
-        $content = File::get($path);
-
-        $patched = preg_replace(
-            ["/(?<=docker\/)[0-9]+\.[0-9]+/", "/(?<=sail-)[0-9]+\.[0-9]+(?=\/app)/"],
-            [$this->phpSail, $nodots],
-            $content,
-        );
-
-        if ($patched !== $content) {
-            File::put($path, $patched);
-        }
-    }
-
-    private function patchJustfile(string $path): void
-    {
-        if (! File::exists($path)) {
-            return;
-        }
-
-        $nodots  = str_replace('.', '', $this->phpSail);
-        $content = File::get($path);
-
-        // e.g. laravelsail/php84-composer → laravelsail/php83-composer
-        $patched = preg_replace('/(?<=php)\d+(?=-composer)/', $nodots, $content);
-
-        if ($patched !== $content) {
-            File::put($path, $patched);
-        }
     }
 
     private function updateEnvFiles(): void
@@ -167,26 +129,26 @@ class InstallCommand extends Command
         $dbReplacements = $this->isPostgres()
             ? [
                 '/^DB_CONNECTION=.*/m' => 'DB_CONNECTION=pgsql',
-                '/^DB_HOST=.*/m'       => 'DB_HOST=pgsql',
-                '/^DB_PORT=.*/m'       => 'DB_PORT=5432',
+                '/^DB_HOST=.*/m' => 'DB_HOST=pgsql',
+                '/^DB_PORT=.*/m' => 'DB_PORT=5432',
             ]
             : [
                 '/^DB_CONNECTION=.*/m' => 'DB_CONNECTION=mysql',
-                '/^DB_HOST=.*/m'       => 'DB_HOST=mariadb',
-                '/^DB_PORT=.*/m'       => 'DB_PORT=3306',
+                '/^DB_HOST=.*/m' => 'DB_HOST=mariadb',
+                '/^DB_PORT=.*/m' => 'DB_PORT=3306',
             ];
 
         // Common patches for local dev (.env / .env.example)
         $localReplacements = array_merge($dbReplacements, [
-            '/^DB_USERNAME=.*/m'      => 'DB_USERNAME=sail',
-            '/^DB_PASSWORD=.*/m'      => 'DB_PASSWORD=password',
-            '/^SESSION_DRIVER=.*/m'   => 'SESSION_DRIVER=redis',
+            '/^DB_USERNAME=.*/m' => 'DB_USERNAME=sail',
+            '/^DB_PASSWORD=.*/m' => 'DB_PASSWORD=password',
+            '/^SESSION_DRIVER=.*/m' => 'SESSION_DRIVER=redis',
             '/^QUEUE_CONNECTION=.*/m' => 'QUEUE_CONNECTION=horizon',
-            '/^CACHE_STORE=.*/m'      => 'CACHE_STORE=redis',
-            '/^REDIS_HOST=.*/m'       => 'REDIS_HOST=valkey',
-            '/^MAIL_MAILER=.*/m'      => 'MAIL_MAILER=smtp',
-            '/^MAIL_HOST=.*/m'        => 'MAIL_HOST=mailpit',
-            '/^MAIL_PORT=.*/m'        => 'MAIL_PORT=1025',
+            '/^CACHE_STORE=.*/m' => 'CACHE_STORE=redis',
+            '/^REDIS_HOST=.*/m' => 'REDIS_HOST=valkey',
+            '/^MAIL_MAILER=.*/m' => 'MAIL_MAILER=smtp',
+            '/^MAIL_HOST=.*/m' => 'MAIL_HOST=mailpit',
+            '/^MAIL_PORT=.*/m' => 'MAIL_PORT=1025',
         ]);
 
         // Pipeline patches: same DB driver, but CI-specific values
@@ -230,4 +192,3 @@ class InstallCommand extends Command
         $this->runProcess(['php', 'artisan', 'boost:install']);
     }
 }
-

@@ -4,6 +4,7 @@ namespace Dziurka\LaravelPreset;
 
 use Dziurka\LaravelPreset\Console\InstallCommand;
 use Dziurka\LaravelPreset\Console\InstallDeployerCommand;
+use Dziurka\LaravelPreset\Console\UpdateCommand;
 use Illuminate\Support\ServiceProvider;
 
 class ScaffoldingServiceProvider extends ServiceProvider
@@ -17,6 +18,7 @@ class ScaffoldingServiceProvider extends ServiceProvider
         $this->commands([
             InstallCommand::class,
             InstallDeployerCommand::class,
+            UpdateCommand::class,
         ]);
 
         $this->publishes([
