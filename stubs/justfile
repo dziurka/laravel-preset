@@ -91,6 +91,20 @@ ide:
 
 # ── Code Quality ─────────────────────────────────────────────────────────────
 
+# Check code quality without Sail — mirrors CI lint job (pint --test + phpstan)
+ci-check:
+    docker run --rm \
+        -u "{{ uid }}:{{ gid }}" \
+        -v "$(pwd):/var/www/html" \
+        -w /var/www/html \
+        laravelsail/php84-composer:latest \
+        bash -c "cp .env.pipelines .env && php vendor/bin/pint --test && php vendor/bin/phpstan analyse --memory-limit=2G"
+
+# Install git hooks from .githooks/
+hooks:
+    git config core.hooksPath .githooks
+    @echo "Git hooks installed. Pre-commit will run: just ci-check"
+
 # Run PHPStan static analysis
 phpstan:
     {{ sail }} php ./vendor/bin/phpstan analyse --memory-limit=2G

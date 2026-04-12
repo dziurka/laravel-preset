@@ -22,6 +22,7 @@ final class UpdateCommand extends Command
         'workflow' => '.github/workflows/app.yml',
         'copilot' => '.github/copilot-instructions.md',
         'justfile' => 'justfile',
+        'phpstan' => 'phpstan.neon',
         'docker' => 'docker/ (directory)',
     ];
 
@@ -102,6 +103,10 @@ final class UpdateCommand extends Command
         if (in_array('justfile', $selected)) {
             $this->copyFile('justfile', $base.'/justfile');
             $this->patchJustfile($base.'/justfile', (string) $phpSail);
+        }
+
+        if (in_array('phpstan', $selected)) {
+            $this->copyFile('phpstan.neon', $base.'/phpstan.neon');
         }
 
         if (in_array('docker', $selected)) {

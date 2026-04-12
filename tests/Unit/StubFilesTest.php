@@ -40,6 +40,7 @@ class StubFilesTest extends TestCase
 
             // Shared
             'justfile' => ['justfile'],
+            'phpstan.neon' => ['phpstan.neon'],
             'deploy.yaml' => ['deploy.yaml'],
 
             // Deployer scripts
