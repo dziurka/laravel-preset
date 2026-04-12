@@ -16,7 +16,7 @@ task('provision:sudoers', function () {
 // ── System packages ───────────────────────────────────────────────────────────
 
 task('provision:packages', function () {
-    $phpVersion  = get('php_version', '8.3');
+    $phpVersion = get('php_version', '8.3');
     $dbExtension = get('db_driver', 'mysql') === 'pgsql'
         ? "php{$phpVersion}-pgsql"
         : "php{$phpVersion}-mysql";
@@ -62,4 +62,3 @@ task('provision:permissions', function () {
     run('sudo chown -R deployer:deployer {{deploy_path}}');
     info('Permissions set for {{deploy_path}}.');
 });
-

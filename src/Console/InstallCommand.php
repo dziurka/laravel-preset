@@ -52,6 +52,7 @@ class InstallCommand extends Command
             $this->installComposerDependencies();
             $this->copyStubs();
             $this->updateEnvFiles();
+            $this->installGitHooks();
 
             if ($this->confirm('Install Deployer for deployment automation?', false)) {
                 $this->call('preset:deployer', [

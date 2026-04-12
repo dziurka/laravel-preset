@@ -5,9 +5,9 @@ namespace Deployer;
 // ── GitHub SSH setup ──────────────────────────────────────────────────────────
 
 task('provision:github', function () {
-    $sshDir             = '/home/deployer/.ssh';
-    $deployKeyPath      = "$sshDir/deployer_rsa";
-    $deployKeyPubPath   = "$deployKeyPath.pub";
+    $sshDir = '/home/deployer/.ssh';
+    $deployKeyPath = "$sshDir/deployer_rsa";
+    $deployKeyPubPath = "$deployKeyPath.pub";
     $authorizedKeysPath = "$sshDir/authorized_keys";
 
     // Generate deploy key if missing
@@ -22,7 +22,7 @@ task('provision:github', function () {
     run("sudo chmod 600 $sshDir/*");
 
     // Add deploy key to authorized_keys (enables Deployer to SSH to itself for rollbacks)
-    $pubKey   = run("cat $deployKeyPubPath");
+    $pubKey = run("cat $deployKeyPubPath");
     $authKeys = test("[ -f $authorizedKeysPath ]") ? run("cat $authorizedKeysPath") : '';
 
     if (! str_contains($authKeys, $pubKey)) {
@@ -40,7 +40,7 @@ task('provision:github', function () {
     writeln('<info>1. Deploy Key</info> → GitHub → Settings → Deploy keys → Add deploy key');
     writeln(run("cat $deployKeyPubPath"));
 
-    $alias  = currentHost()->getAlias();
+    $alias = currentHost()->getAlias();
     $suffix = strtoupper($alias);
 
     writeln('');
@@ -66,17 +66,17 @@ task('provision:github', function () {
  *        dep provision:github-secrets production
  */
 task('provision:github-secrets', function () {
-    $sshDir           = '/home/deployer/.ssh';
-    $deployKeyPath    = "$sshDir/deployer_rsa";
+    $sshDir = '/home/deployer/.ssh';
+    $deployKeyPath = "$sshDir/deployer_rsa";
     $deployKeyPubPath = "$deployKeyPath.pub";
 
     if (! test("[ -f $deployKeyPath ]")) {
         throw new \RuntimeException('Deploy key not found — run  dep provision  first.');
     }
 
-    $alias      = currentHost()->getAlias();
-    $suffix     = strtoupper($alias);
-    $hostname   = get('hostname');
+    $alias = currentHost()->getAlias();
+    $suffix = strtoupper($alias);
+    $hostname = get('hostname');
 
     // Ask before touching anything — keys are sensitive
     if (! askConfirmation("Configure GitHub for [{$alias}] (set SSH_KEY_{$suffix}, KNOWN_HOSTS_{$suffix} and deploy key)?")) {
@@ -86,7 +86,7 @@ task('provision:github-secrets', function () {
     }
 
     $privateKey = run("cat $deployKeyPath");
-    $pubKey     = run("cat $deployKeyPubPath");
+    $pubKey = run("cat $deployKeyPubPath");
     $knownHosts = run("ssh-keyscan -t ed25519 $hostname 2>/dev/null");
 
     // Check if gh CLI is available locally
@@ -151,8 +151,8 @@ function applySecretsViaGhCli(
     $title = "deployer@{$hostname} ({$alias})";
 
     try {
-        runLocally("gh repo deploy-key add ".escapeshellarg($tmpPub)." --title ".escapeshellarg($title));
-        info("✓ Deploy key added to repository.");
+        runLocally('gh repo deploy-key add '.escapeshellarg($tmpPub).' --title '.escapeshellarg($title));
+        info('✓ Deploy key added to repository.');
     } catch (\Throwable $e) {
         warning("Deploy key may already exist: {$e->getMessage()}");
     } finally {
@@ -200,7 +200,7 @@ function printSecretsForManualSetup(
  * Activate by uncommenting in provision.php.
  */
 task('provision:mysql', function () {
-    $user     = get('db_user');
+    $user = get('db_user');
     $password = get('db_password');
 
     $queries = [
@@ -208,7 +208,7 @@ task('provision:mysql', function () {
         "GRANT ALL PRIVILEGES ON *.* TO '{$user}'@'localhost' WITH GRANT OPTION",
         "ALTER USER '{$user}'@'%'         IDENTIFIED WITH mysql_native_password BY '$password'",
         "ALTER USER '{$user}'@'localhost'  IDENTIFIED WITH mysql_native_password BY '$password'",
-        "FLUSH PRIVILEGES",
+        'FLUSH PRIVILEGES',
     ];
 
     foreach ($queries as $query) {

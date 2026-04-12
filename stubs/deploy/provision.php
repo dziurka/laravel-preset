@@ -26,4 +26,3 @@ task('provision:after', [
 
 // Uncomment to configure MySQL native password authentication:
 // after('provision:after', 'provision:mysql');
-
